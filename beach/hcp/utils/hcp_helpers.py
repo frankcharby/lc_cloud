@@ -455,7 +455,7 @@ class RWLock( object ):
 
 class AgentId( object ):
     
-    empty_uuid = uuid.UUID( bytes = "\x00" * 16 )
+    empty_uuid = uuid.UUID( bytes = b"\x00" * 16 )
     re_agent_id = re.compile( r'^((?:[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12})|(?:0))(?:\.((?:[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12})|(?:0))\.((?:[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12})|(?:0))\.([0-9a-fA-F]+)\.([0-9a-fA-F]+))?$' )
 
     PLATFORM_WINDOWS = 0x10000000

@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from beach.actor import Actor
-from sets import Set
+#from sets import Set
 import hashlib
 import base64
 import uuid
@@ -223,7 +223,7 @@ class HostObjects( object ):
                 # Because they are sharded in 256 shards and because the actual records' primary key includes an aid
                 # there will be duplicates between shards and even within a single shard. So to provide a unified
                 # view we need to summarize on a per-type basis.
-                ids = Set()
+                ids = set()
                 for d in range( 0, 256 ):
                     for row in cls._db.execute( 'SELECT id FROM loc_by_type WHERE d256 = %s AND otype = %s', ( d, cls._castType( t ) ) ):
                         ids.add( row[ 0 ] )
@@ -238,18 +238,18 @@ class HostObjects( object ):
             ofType = ObjectTypes.forward[ ofType ]
 
         def thisGen():
-            ids = Set()
+            ids = set()
             for cid in withChildren:
                 tmp = [ x[ 0 ] for x in cls._db.execute( 'SELECT pid FROM rel_man_child WHERE childKey = %s AND ptype = %s', ( cid, ofType ) ) ]
                 if 0 == len( ids ):
-                    ids = Set( tmp )
+                    ids = set( tmp )
                 else:
                     ids = ids.intersection( tmp )
 
             for pid in withParents:
                 tmp = [ x[ 0 ] for x in cls._db.execute( 'SELECT cid FROM rel_man_parent WHERE parentKey = %s AND ctype = %s', ( pid, ofType ) ) ]
                 if 0 == len( ids ):
-                    ids = Set( tmp )
+                    ids = set( tmp )
                 else:
                     ids = ids.intersection( tmp )
 
@@ -296,7 +296,7 @@ class HostObjects( object ):
     def acl( self, oid = None ):
         if oid is None:
             return type(self)( self._ids )
-        if type( oid ) not in ( list, tuple, Set ):
+        if type( oid ) not in ( list, tuple, set ):
             oid = [ oid ]
         def thisGen():
             for ids in chunks( self._ids, self._queryChunks ):
@@ -317,18 +317,18 @@ class HostObjects( object ):
         if within is not None:
             within = int( time.time() ) - int( within )
 
-        if oid is not None and type( oid ) not in ( list, tuple, Set ):
+        if oid is not None and type( oid ) not in ( list, tuple, set ):
             oid = [ oid ]
 
         for ids in chunks( self._ids, self._queryChunks ):
             for rows in chunks( self._db.execute( 'SELECT id, sid, last FROM loc_by_id WHERE id IN %s', ( ids, ) ), self._queryChunks ):
                 if oid is not None:
-                    validSids = Set()
+                    validSids = set()
                     for tmpSid, tmpOid in self._db.execute( 'SELECT sid, oid FROM sensor_states WHERE sid IN %s', ( [ x[ 1 ] for x in rows ], ) ):
                         if tmpOid in oid:
                             validSids.add( tmpSid )
                 else:
-                    validSids = Set( x[ 1 ] for x in rows )
+                    validSids = set( x[ 1 ] for x in rows )
                 for row in rows:
                     if row[ 1 ] not in validSids:
                         continue
