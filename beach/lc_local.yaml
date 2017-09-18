@@ -37,7 +37,6 @@ port_range_end: 6000
 # Default: 60
 peer_keepalive_seconds: 60
 
-
 # A keepalive request is sent to python instances on the host
 # every X seconds
 # Default: 60

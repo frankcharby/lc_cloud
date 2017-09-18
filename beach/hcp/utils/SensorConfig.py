@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from beach.actor import Actor
-from sets import Set
+#from sets import Set
 import hashlib
 import base64
 import uuid
@@ -64,7 +64,7 @@ class _collector_0( _collector ):
     colId = HbsCollectorId.EXFIL
     
     def init( self ):
-        self.exfil = Set()
+        self.exfil = set()
 
     def addExfil( self, eventId ):
         self.exfil.add( int( eventId ) )
@@ -218,8 +218,8 @@ class _collector_18( _collector ):
     colId = HbsCollectorId.DOC_COLLECTOR
 
     def init( self ):
-        self.extensions = Set()
-        self.patterns = Set()
+        self.extensions = set()
+        self.patterns = set()
 
     def addExtension( self, extension ):
         self.extensions.add( extension )
@@ -270,7 +270,7 @@ class _collector_22( _collector ):
     colId = HbsCollectorId.FILE_TYPE_TRACKER
 
     def init( self ):
-        self.extensions = Set()
+        self.extensions = set()
 
     def addExtension( self, ruleId, extension ):
         self.extensions.add( ( int( ruleId ), extension ) )
