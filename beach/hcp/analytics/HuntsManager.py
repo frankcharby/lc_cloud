@@ -15,7 +15,7 @@
 from beach.actor import Actor
 from beach.beach_api import Beach
 
-from sets import Set
+#from sets import Set
 
 class HuntsManager( Actor ):
     def init( self, parameters, resources ):

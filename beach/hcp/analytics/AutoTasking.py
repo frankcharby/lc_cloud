@@ -14,7 +14,7 @@
 
 from beach.actor import Actor
 
-from sets import Set
+#from sets import Set
 
 HcpCli = Actor.importLib( '../admin_cli', 'HcpCli' )
 ArgumentParserError = Actor.importLib( '../admin_cli', 'ArgumentParserError' )
@@ -40,7 +40,7 @@ class AutoTasking( Actor ):
 
         self.sensor_qph = parameters.get( 'sensor_qph', 50 )
         self.global_qph = parameters.get( 'global_qph', 200 )
-        self.allowed_commands = Set( parameters.get( 'allowed', [] ) )
+        self.allowed_commands = set( parameters.get( 'allowed', [] ) )
         self.model = self.getActorHandle( resources[ 'modeling' ] )
         self.handle( 'task', self.handleTasking )
         self.sensor_stats = {}
@@ -130,7 +130,7 @@ class AutoTasking( Actor ):
         expiry = msg.data.get( 'expiry', None )
         invId = msg.data.get( 'inv_id', None )
 
-        sent = Set()
+        sent = set()
 
         for task in tasks:
             task = tuple( task )

@@ -14,7 +14,7 @@
 
 from beach.actor import Actor
 import time
-from sets import Set
+#from sets import Set
 import uuid
 import json
 import tld
@@ -161,10 +161,10 @@ class BlinkModel( Actor ):
         # 0 : THIS_ATOM
         # 1 : PARENT_ATOM
         # 2 : KEY
-        # 3 : Set(TAGS)
+        # 3 : set(TAGS)
         # 4 : TIME
 
-        ofInterest = Set( ( 'notification.NEW_PROCESS',
+        ofInterest = set( ( 'notification.NEW_PROCESS',
                             'notification.CODE_IDENTITY',
                             'notification.DNS_REQUEST',
                             'notification.MODULE_LOAD' ) )

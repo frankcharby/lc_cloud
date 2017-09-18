@@ -21,7 +21,7 @@ import msgpack
 import datetime
 import random
 import traceback
-from sets import Set
+#from sets import Set
 CassDb = Actor.importLib( '../utils/hcp_databases', 'CassDb' )
 CassPool = Actor.importLib( '../utils/hcp_databases', 'CassPool' )
 AgentId = Actor.importLib( '../utils/hcp_helpers', 'AgentId' )

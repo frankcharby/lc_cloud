@@ -18,7 +18,7 @@ from slackclient import SlackClient
 import json
 import uuid
 import base64
-from sets import Set
+#from sets import Set
 import datetime
 import shlex
 import traceback
@@ -102,7 +102,7 @@ class SlackRep( Actor ):
         self.log( "Received investigation" )
         detect = msg.data
         sources = self.getSources( detect )
-        oids = Set( [ x.org_id for x in sources ] )
+        oids = set( [ x.org_id for x in sources ] )
         for oid in oids:
             rep = self.reps.get( oid, None )
             if rep is not None:
@@ -113,7 +113,7 @@ class SlackRep( Actor ):
         self.log( "Received detection" )
         detect = msg.data
         sources = self.getSources( detect )
-        oids = Set( [ x.org_id for x in sources ] )
+        oids = set( [ x.org_id for x in sources ] )
         for oid in oids:
             rep = self.reps.get( oid, None )
             if rep is not None:

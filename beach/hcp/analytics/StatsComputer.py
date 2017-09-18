@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from beach.actor import Actor
-from sets import Set
+#from sets import Set
 ObjectTypes = Actor.importLib( '../utils/ObjectsDb', 'ObjectTypes' )
 HostObjects = Actor.importLib( '../utils/ObjectsDb', 'HostObjects' )
 BEAdmin = Actor.importLib( '../admin_lib', 'BEAdmin' )

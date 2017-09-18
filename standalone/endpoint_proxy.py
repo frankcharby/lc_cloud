@@ -12,7 +12,7 @@ import gevent
 import random
 import msgpack
 import struct
-from sets import Set
+#from sets import Set
 from gevent.server import StreamServer
 from gevent.socket import create_connection
 
@@ -76,7 +76,7 @@ def updateEndpoints( endpointActors, nextUpdate ):
     endpointActors.forceRefresh()
     responses = endpointActors.requestFromAll( 'report' )
     
-    newEndpoints = Set()
+    newEndpoints = set()
     while responses.waitForResults( timeout = 10 ):
         for response in responses.getNewResults():
             if 'data' in response and 'address' in response[ 'data' ] and 'port' in response[ 'data' ]:
@@ -118,7 +118,7 @@ if __name__ == '__main__':
                          dest = 'update' )
     arguments = parser.parse_args()
 
-    currentEndpoints = Set()
+    currentEndpoints = set()
     beach = Beach( arguments.config, realm = 'hcp' )
     endpointActors = beach.getActorHandle( 'c2/endpoint', nRetries = 3, timeout = 30, ident = arguments.ident )
 

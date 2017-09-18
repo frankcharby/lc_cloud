@@ -292,7 +292,7 @@ We believe this sharing policy strikes a good balance between privacy and inform
                 resp = json.loads( urllib.request.urlopen( 'https://api.github.com/repos/refractionPOINT/limacharlie/releases/latest' ).read() )
                 sensorPackage = resp[ 'assets' ][ 0 ][ 'browser_download_url' ]
             except:
-                sensorpackage = ''
+                sensorPackage = ''
             self.admin_oid = adminOid
             self.log( 'loading admin oid' )
             self.db.execute( 'INSERT INTO configs ( conf, value ) VALUES ( %s, %s )', ( 'global/admin_oid', str( adminOid ) ) )

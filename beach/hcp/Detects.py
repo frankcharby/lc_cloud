@@ -14,7 +14,7 @@
 
 from beach.actor import Actor
 import hashlib
-from sets import Set
+#from sets import Set
 import time
 StateMachine = Actor.importLib( 'analytics/StateAnalysis', 'StateMachine' )
 StateEvent = Actor.importLib( 'analytics/StateAnalysis', 'StateEvent' )
@@ -184,8 +184,8 @@ class StatefulActor ( Actor ):
                 if hasattr( self, 'processDetect' ):
                     reportContent = self.processDetect( reportContent )
                 report = GenerateDetectReport( i,
-                                               tuple( Set( [ e.routing[ 'aid' ] for e in reportContent ] ) ),
-                                               tuple( Set( [ e.routing[ 'event_id' ] for e in reportContent ] ) ),
+                                               tuple( set( [ e.routing[ 'aid' ] for e in reportContent ] ) ),
+                                               tuple( set( [ e.routing[ 'event_id' ] for e in reportContent ] ) ),
                                                reportType,
                                                [ x.event for x in reportContent ],
                                                reportSummary,
