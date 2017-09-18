@@ -88,9 +88,9 @@ def RunningPidReset():
         if currentPid is not None:
             proc = indexes[ 'pid' ].get( currentPid, None )
             if proc is not None:
-                for idx in indexes.values():
+                for idx in list(indexes.values()):
                     if type( idx ) is dict:
-                        for idxKey, idxVal in idx.items():
+                        for idxKey, idxVal in list(idx.items()):
                             if idxVal == proc:
                                 del( idx[ idxKey ] )
                                 break

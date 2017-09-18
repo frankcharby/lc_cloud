@@ -23,7 +23,7 @@ import time
 import json
 import uuid
 import msgpack
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 from zipfile import ZipFile
 from io import BytesIO
 import random
@@ -215,7 +215,7 @@ class DeploymentManager( Actor ):
         if not info or info[ 0 ] is None or info[ 0 ] == '':
             self.log( 'no sensor package defined' )
         else:
-            pkgUrl = urllib2.urlopen( info[ 0 ] )
+            pkgUrl = urllib.request.urlopen( info[ 0 ] )
             zipPackage = ZipFile( BytesIO( pkgUrl.read() ) )
             packages = { name: zipPackage.read( name ) for name in zipPackage.namelist() }
         return packages
@@ -305,7 +305,7 @@ Therefore, you running "some_unique_exrcutable_to_you.exe" on one of your sensor
 We believe this sharing policy strikes a good balance between privacy and information sharing between users of the Service allowing for a better visibility and investigative power.
             '''
             try:
-                resp = json.loads( urllib2.urlopen( 'https://api.github.com/repos/refractionPOINT/limacharlie/releases/latest' ).read() )
+                resp = json.loads( urllib.request.urlopen( 'https://api.github.com/repos/refractionPOINT/limacharlie/releases/latest' ).read() )
                 sensorPackage = resp[ 'assets' ][ 0 ][ 'browser_download_url' ]
             except:
                 sensorpackage = ''
@@ -467,7 +467,7 @@ We believe this sharing policy strikes a good balance between privacy and inform
         hbsToLoad = {}
         kernelToLoad = {}
 
-        for binName, binary in sensorPackage.iteritems():
+        for binName, binary in sensorPackage.items():
             if binName.startswith( 'hcp_' ):
                 patched = self.setSensorConfig( binary, hcpConfig )
                 if 'osx' in binName and osxAppBundle is not None:
@@ -487,7 +487,7 @@ We believe this sharing policy strikes a good balance between privacy and inform
             self.log( 'error wiping previous installers: %s' % resp )
             return False
 
-        for binName, binary in installersToLoad.iteritems():
+        for binName, binary in installersToLoad.items():
             resp = self.admin.request( 'hcp.add_installer', { 'oid' : oid, 
                                                               'iid' : iid, 
                                                               'description' : binName, 
@@ -501,7 +501,7 @@ We believe this sharing policy strikes a good balance between privacy and inform
             self.log( 'error wiping previous taskings: %s' % resp )
             return False
             
-        for binName, binInfo in hbsToLoad.iteritems():
+        for binName, binInfo in hbsToLoad.items():
             binary, binSig, binHash = binInfo
             aid = self.getMaskFor( oid, binName )
             resp = self.admin.request( 'hcp.add_module', { 'module_id' : HcpModuleId.HBS,
@@ -519,7 +519,7 @@ We believe this sharing policy strikes a good balance between privacy and inform
                 self.log( 'error adding new hbs module: %s' % resp )
                 return False
 
-        for binName, binInfo in kernelToLoad.iteritems():
+        for binName, binInfo in kernelToLoad.items():
             binary, binSig, binHash = binInfo
             aid = self.getMaskFor( oid, binName )
             resp = self.admin.request( 'hcp.add_module', { 'module_id' : HcpModuleId.KERNEL_ACQ,
@@ -559,7 +559,7 @@ We believe this sharing policy strikes a good balance between privacy and inform
             'global/policy' : ''
         }
 
-        info = self.db.execute( 'SELECT conf, value FROM configs WHERE conf IN %s', ( globalConf.keys(), ) )
+        info = self.db.execute( 'SELECT conf, value FROM configs WHERE conf IN %s', ( list(globalConf.keys()), ) )
 
         for row in info:
             globalConf[ row[ 0 ] ] = row[ 1 ]
@@ -573,7 +573,7 @@ We believe this sharing policy strikes a good balance between privacy and inform
             '%s/slack_bot_token' % oid : '',
         }
 
-        info = self.db.execute( 'SELECT conf, value FROM configs WHERE conf IN %s', ( orgConf.keys(), ) )
+        info = self.db.execute( 'SELECT conf, value FROM configs WHERE conf IN %s', ( list(orgConf.keys()), ) )
 
         for row in info:
             orgConf[ row[ 0 ] ] = row[ 1 ]
@@ -662,13 +662,13 @@ We believe this sharing policy strikes a good balance between privacy and inform
 
         profile = SensorConfig()
 
-        for colId, status in req[ 'collectors' ].iteritems():
+        for colId, status in req[ 'collectors' ].items():
             if status is False:
                 profile.collectors[ colId ].disable()
             else:
                 profile.collectors[ colId ].enable()
 
-        for eventId, status in req[ 'exfil' ].iteritems():
+        for eventId, status in req[ 'exfil' ].items():
             if status is True:
                 profile.collectors[ 0 ].addExfil( eventId )
 
@@ -696,7 +696,7 @@ We believe this sharing policy strikes a good balance between privacy and inform
 
     def get_supported_events( self, msg ):
         allEvents = {}
-        for attrName, attrVal in Symbols.notification.__dict__.iteritems():
+        for attrName, attrVal in Symbols.notification.__dict__.items():
             if attrName == 'lookups': continue
             allEvents[ attrName ] = int( attrVal )
         return ( True, allEvents )

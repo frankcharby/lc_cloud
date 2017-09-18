@@ -48,7 +48,7 @@ class FileEventsOutput( Actor ):
 
     def sanitizeJson( self, o ):
         if type( o ) is dict:
-            for k, v in o.iteritems():
+            for k, v in o.items():
                 o[ k ] = self.sanitizeJson( v )
         elif type( o ) is list or type( o ) is tuple:
             o = [ self.sanitizeJson( x ) for x in o ]
@@ -56,7 +56,7 @@ class FileEventsOutput( Actor ):
             o = str( o )
         else:
             try:
-                if ( type(o) is str or type(o) is unicode ) and "\x00" in o: raise Exception()
+                if ( type(o) is str or type(o) is str ) and "\x00" in o: raise Exception()
                 json.dumps( o )
             except:
                 o = base64.b64encode( o )
@@ -67,7 +67,7 @@ class FileEventsOutput( Actor ):
         isEntry = newRoot is None
         if isEntry: newRoot = {}
         if type( o ) is dict:
-            for k, v in o.iteritems():
+            for k, v in o.items():
                 if -1 != k.find( '.' ):
                     newK = k[ k.find( '.' ) + 1 : ]
                 else:
@@ -105,8 +105,7 @@ class FileEventsOutput( Actor ):
         return ( True, )
 
     def reportDetectOrInv( self, msg ):
-        msg.data[ 'hostnames' ] = map( lambda x: Host( x ).getHostName(), 
-                                       msg.data[ 'source' ].split( ' / ' ) )
+        msg.data[ 'hostnames' ] = [Host( x ).getHostName() for x in msg.data[ 'source' ].split( ' / ' )]
 
         record = msg.data
 

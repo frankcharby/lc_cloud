@@ -176,7 +176,7 @@ class AdminEndpoint( Actor ):
                 for row in self.db.execute( 'SELECT aid, mid, mhash FROM hcp_module_tasking' ):
                     # This module is still in use...
                     deleted.pop( ( row[ 0 ], row[ 1 ] ), None )
-                for mid, mhash in deleted.keys():
+                for mid, mhash in list(deleted.keys()):
                     self.db.execute( 'DELETE FROM hcp_modules WHERE mid = %s AND mhash = %s', ( mid, mhash ) )
 
 
@@ -302,9 +302,9 @@ class AdminEndpoint( Actor ):
     def cmd_hbs_getProfiles( self, msg ):
         data = { 'profiles' : [] }
         oids = msg.data.get( 'oid', [] )
-        if type( oids ) in ( str, unicode ):
+        if type( oids ) in ( str, str ):
             oids = [ oids ]
-        oids = map( uuid.UUID, oids )
+        oids = list(map( uuid.UUID, oids ))
         if msg.data.get( 'is_compiled', False ):
             rows = self.db.execute( 'SELECT aid, cprofile FROM hbs_profiles' )
         else:
@@ -345,7 +345,7 @@ class AdminEndpoint( Actor ):
                                  'rList' : rList,
                                  'rSequence' : rSequence,
                                  'HbsCollectorId' : HbsCollectorId }
-            if type( c ) in ( str, unicode ):
+            if type( c ) in ( str, str ):
                 try:
                     profile = eval( c.replace( '\n', '' ), rpcm_environment )
                 except:

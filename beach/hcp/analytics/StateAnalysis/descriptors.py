@@ -31,7 +31,7 @@ NewDocumentNamed = Actor.importLib( './transitions', 'NewDocumentNamed' )
 
 def ProcessBurst( name, priority, summary, procRegExp, nPerBurst, withinMilliSeconds ):
     states = []
-    for i in xrange( 0, nPerBurst ):
+    for i in range( 0, nPerBurst ):
         states.append( State( StateTransition( isRecordOnMatch = True, 
                                                isReportOnMatch = False if i < nPerBurst - 1 else True,
                                                toState = i + 1 if i < nPerBurst - 1 else 0, 
@@ -93,7 +93,7 @@ def ProcessDescendant( name, priority, summary, isDirectOnly, parentRegExp = Non
 
 def EventBurst( name, priority, summary, eventType, nPerBurst, withinMilliSeconds ):
     states = []
-    for i in xrange( 0, nPerBurst ):
+    for i in range( 0, nPerBurst ):
         states.append( State( StateTransition( isRecordOnMatch = True, 
                                                isReportOnMatch = False if i < nPerBurst else True,
                                                toState = i + 1 if i < nPerBurst - 1 else 0, 

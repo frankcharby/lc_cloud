@@ -27,7 +27,7 @@ try:
     from beach.actor import Actor
     rSequence = Actor.importLib( './rpcm', 'rSequence' )
 except:
-    from rpcm import rSequence
+    from .rpcm import rSequence
 
 try:
     import gevent.lock
@@ -68,7 +68,7 @@ def _xm_( o, path, isWildcardDepth = False ):
     result = []
     oType = type( o )
 
-    if type( path ) is str or type( path ) is unicode:
+    if type( path ) is str or type( path ) is str:
         tokens = [ x for x in path.split( '/' ) if x != '' ]
     else:
         tokens = path
@@ -87,11 +87,11 @@ def _xm_( o, path, isWildcardDepth = False ):
             elif '?' == curToken:
                 if 1 < len( tokens ):
                     result = []
-                    for elem in o.itervalues():
+                    for elem in o.values():
                         if _isDynamicType( elem ):
                             result += _xm_( elem, tokens[ 1 : ], False )
 
-            elif o.has_key( curToken ):
+            elif curToken in o:
                 if isEndPoint:
                     result = [ o[ curToken ] ] if not _isListType( o[ curToken ] ) else o[ curToken ]
                 elif _isDynamicType( o[ curToken ] ):
@@ -99,7 +99,7 @@ def _xm_( o, path, isWildcardDepth = False ):
 
             if isWildcardDepth:
                 tmpTokens = tokens[ : ]
-                for elem in o.itervalues():
+                for elem in o.values():
                     if _isDynamicType( elem ):
                         result += _xm_( elem, tmpTokens, True )
     elif issubclass( oType, list ) or oType is tuple:
@@ -139,7 +139,7 @@ def exeFromPath( path, agent = None ):
 
 def hexDump( src, length = 8 ):
     result = []
-    for i in xrange( 0, len( src ), length ):
+    for i in range( 0, len( src ), length ):
        s = src[ i : i + length ]
        hexa = ' '.join( [ "%02X" % ord( x ) for x in s ] )
        printable = s.translate( ''.join( [ ( len( repr( chr( x ) ) ) == 3 ) and chr( x ) or '.' for x in range( 256 ) ] ) )
@@ -365,8 +365,8 @@ def file_lock( lock_file ):
             print( "some stuff" )
     '''
     if os.path.exists(lock_file):
-        print 'Only one script can run at once. '\
-              'Script is locked with %s' % lock_file
+        print('Only one script can run at once. '\
+              'Script is locked with %s' % lock_file)
         sys.exit(-1)
     else:
         open(lock_file, 'w').write("1")
@@ -381,7 +381,7 @@ def timedFunction( f ):
     def wrapped( *args, **kwargs ):
         start = time.time()
         r = f( *args, **kwargs )
-        print( "%s: %s" % ( f.__name__, time.time() - start ) )
+        print(( "%s: %s" % ( f.__name__, time.time() - start ) ))
         return r
     return wrapped
 
@@ -501,7 +501,7 @@ class AgentId( object ):
             if self.platform is not None:
                 self.platform = int( self.platform )
                 
-        elif type( seq ) is str or type( seq ) is unicode or type( seq ) is uuid.UUID:
+        elif type( seq ) is str or type( seq ) is str or type( seq ) is uuid.UUID:
             seq = str( seq )
             matches = self.re_agent_id.match( seq )
             if matches is not None:

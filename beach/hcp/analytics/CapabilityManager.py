@@ -17,7 +17,7 @@ from beach.patrol import Patrol
 
 Mutex = Actor.importLib( '../utils/hcp_helpers', 'Mutex' )
 
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 import json
 import tempfile
 
@@ -119,7 +119,7 @@ class CapabilityManager( Actor ):
                     url = 'file://%s' % tmpPatrol.name
                     tmpPatrol.close()
 
-            capability = urllib2.urlopen( url ).read()
+            capability = urllib.request.urlopen( url ).read()
 
             summary = self.getDetectionMtdFromContent( capability )
             if summary is not None:

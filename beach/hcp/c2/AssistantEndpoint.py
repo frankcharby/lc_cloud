@@ -61,7 +61,7 @@ class AssistantEndpoint( Actor ):
     def count_sensors( self, action, params, ctx ):
         resp = self.Model.request( 'list_sensors', {} )
         if resp.isSuccess:
-            sensors = resp.data.keys()
+            sensors = list(resp.data.keys())
             platform = params.get( 'platform', None )
             platform = platform if ( platform is not None and platform != '' and platform != 'all' ) else None
             if platform is not None:

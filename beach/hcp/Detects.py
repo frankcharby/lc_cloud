@@ -135,7 +135,7 @@ class StatefulActor ( Actor ):
         self._machines.append( StateMachine( desc ) )
 
     def _garbageCollectOldMachines( self ):
-        for shard in self._compiled_machines.keys():
+        for shard in list(self._compiled_machines.keys()):
             for machine in self._compiled_machines[ shard ]:
                 if self._machine_activity[ machine ] < time.time() - self._machine_ttl:
                     del( self._machine_activity[ machine ] )

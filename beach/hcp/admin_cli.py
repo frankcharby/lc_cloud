@@ -29,12 +29,12 @@ import base64
 import uuid
 
 try:
-    from admin_lib import BEAdmin
+    from .admin_lib import BEAdmin
     from hcp_helpers import AgentId
     from rpcm import rSequence
     from rpcm import rList
-    from Symbols import Symbols
-    from signing import Signing
+    from .Symbols import Symbols
+    from .signing import Signing
 except:
     from beach.actor import Actor
     BEAdmin = Actor.importLib( 'admin_lib', 'BEAdmin' )
@@ -59,7 +59,7 @@ def report_errors( func ):
             try:
                 return func( *args,**kwargs )
             except:
-                print( traceback.format_exc() )
+                print(( traceback.format_exc() ))
                 syslog.syslog( traceback.format_exc() )
                 return None
         else:
@@ -231,7 +231,7 @@ class HcpCli ( cmd.Cmd ):
 
             del( tmp )
 
-        for k, a in vars( arguments ).iteritems():
+        for k, a in vars( arguments ).items():
             if type( a ) is AgentId:
                 setattr( arguments, k, str( a ) )
 
@@ -690,7 +690,7 @@ class HcpCli ( cmd.Cmd ):
         agents = self.execAndPrintResponse( self.be.hcp_getAgentStates, getAgentsArg )
         if agents is not None:
             if 'agents' in agents:
-                for aid in agents[ 'agents' ].keys():
+                for aid in list(agents[ 'agents' ].keys()):
                     self.outputString( "Tasking agent %s: %s" % ( aid, str( arguments ) ) )
                     arguments.toAgent = AgentId( aid )
                     self.execAndPrintResponse( self.be.hbs_taskAgent, arguments, True )
@@ -705,7 +705,7 @@ class HcpCli ( cmd.Cmd ):
 
         parser = self.getParser( 'file_get', True )
         parser.add_argument( 'file',
-                             type = unicode,
+                             type = str,
                              help = 'file path to file to get' )
         arguments = self.parse( parser, s )
         if arguments is not None:
@@ -719,7 +719,7 @@ class HcpCli ( cmd.Cmd ):
 
         parser = self.getParser( 'file_info', True )
         parser.add_argument( 'file',
-                             type = unicode,
+                             type = str,
                              help = 'file path to file to get info on' )
         arguments = self.parse( parser, s )
         if arguments is not None:
@@ -733,10 +733,10 @@ class HcpCli ( cmd.Cmd ):
 
         parser = self.getParser( 'dir_list', True )
         parser.add_argument( 'rootDir',
-                             type = unicode,
+                             type = str,
                              help = 'the root directory where to begin the listing from' )
         parser.add_argument( 'fileExp',
-                             type = unicode,
+                             type = str,
                              help = 'a file name expression supporting basic wildcards like * and ?' )
         parser.add_argument( '-d', '--depth',
                              dest = 'depth',
@@ -757,7 +757,7 @@ class HcpCli ( cmd.Cmd ):
 
         parser = self.getParser( 'file_del', True )
         parser.add_argument( 'file',
-                             type = unicode,
+                             type = str,
                              help = 'file path to delete' )
         arguments = self.parse( parser, s )
         if arguments is not None:
@@ -771,10 +771,10 @@ class HcpCli ( cmd.Cmd ):
 
         parser = self.getParser( 'file_mov', True )
         parser.add_argument( 'srcFile',
-                             type = unicode,
+                             type = str,
                              help = 'source file path' )
         parser.add_argument( 'dstFile',
-                             type = unicode,
+                             type = str,
                              help = 'destination file path' )
         arguments = self.parse( parser, s )
         if arguments is not None:
@@ -789,7 +789,7 @@ class HcpCli ( cmd.Cmd ):
 
         parser = self.getParser( 'file_hash', True )
         parser.add_argument( 'file',
-                             type = unicode,
+                             type = str,
                              help = 'file path to hash' )
         arguments = self.parse( parser, s )
         if arguments is not None:
@@ -1026,7 +1026,7 @@ class HcpCli ( cmd.Cmd ):
                              type = int,
                              help = 'pid of the process to search in' )
         parser.add_argument( '-s', '--strings',
-                             type = unicode,
+                             type = str,
                              required = True,
                              nargs = '*',
                              dest = 'strings',
@@ -1048,7 +1048,7 @@ class HcpCli ( cmd.Cmd ):
 
         parser = self.getParser( 'mem_find_handle', True )
         parser.add_argument( 'needle',
-                             type = unicode,
+                             type = str,
                              help = 'substring of the handle names to get' )
         arguments = self.parse( parser, s )
         if arguments is not None:
@@ -1240,12 +1240,12 @@ class HcpCli ( cmd.Cmd ):
                              dest = 'pid',
                              help = 'pid of the process to scan' )
         parser.add_argument( '-f', '--filePath',
-                             type = unicode,
+                             type = str,
                              required = False,
                              dest = 'filePath',
                              help = 'path of the file to scan' )
         parser.add_argument( '-e', '--processExpr',
-                             type = unicode,
+                             type = str,
                              required = False,
                              dest = 'proc',
                              help = 'expression to match on to scan (matches on full process path)' )

@@ -75,7 +75,7 @@ class AutoTasking( Actor ):
         return cli
 
     def decay( self ):
-        for k in self.sensor_stats.iterkeys():
+        for k in self.sensor_stats.keys():
             self.sensor_stats[ k ] = 0
         self.global_stats = 0
 

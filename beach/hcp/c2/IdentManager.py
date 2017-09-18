@@ -82,7 +82,7 @@ class IdentManager( Actor ):
     def asUuidList( self, elem ):
         if type( elem ) not in ( list, tuple ):
             elem = [ elem ]
-        return map( uuid.UUID, elem )
+        return list(map( uuid.UUID, elem ))
 
     def authenticate( self, msg ):
         req = msg.data
@@ -336,8 +336,8 @@ class IdentManager( Actor ):
             for row in info:
                 membership.setdefault( row[ 0 ], {} ).setdefault( row[ 1 ], None )
 
-        for oid, org in membership.iteritems():
-            for uid in org.keys():
+        for oid, org in membership.items():
+            for uid in list(org.keys()):
                 info = self.db.getOne( 'SELECT email, is_deleted FROM user_info WHERE uid = %s', ( uid, ) )
                 if info is None:
                     return ( False, 'error getting user info' )

@@ -32,7 +32,7 @@ class AnalyticsInvestigation( Actor ):
 
     def invCulling( self ):
         curTime = int( time.time() )
-        inv_ids = [ inv_id for inv_id, ts in self.handleTtl.iteritems() if ts < ( curTime - self.ttl ) ]
+        inv_ids = [ inv_id for inv_id, ts in self.handleTtl.items() if ts < ( curTime - self.ttl ) ]
         for inv_id in inv_ids:
             self.handleCache[ inv_id ].close()
             del( self.handleCache[ inv_id ] )

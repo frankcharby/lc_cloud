@@ -95,11 +95,11 @@ class ModuleManager( Actor ):
     		if match is not False:
     			shouldBeLoaded[ match[ 1 ] ] = match[ 0 ]
 
-    	for hLoaded, iLoaded in loaded.iteritems():
+    	for hLoaded, iLoaded in loaded.items():
     		if hLoaded not in shouldBeLoaded or iLoaded != shouldBeLoaded[ hLoaded ]:
     			changes[ 'unload' ].append( iLoaded )
 
-        for hToLoad, iToLoad in shouldBeLoaded.iteritems():
+        for hToLoad, iToLoad in shouldBeLoaded.items():
             if hToLoad not in loaded or iToLoad != loaded[ hToLoad ]:
                 dToLoad, sToLoad = self.getModule( iToLoad, hToLoad )
                 modInfo = ( iToLoad, hToLoad, dToLoad, sToLoad )

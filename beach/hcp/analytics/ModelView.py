@@ -66,7 +66,7 @@ class ModelView( Actor ):
     def asUuidList( self, elem ):
         if type( elem ) not in ( list, tuple ):
             elem = [ elem ]
-        return map( uuid.UUID, elem )
+        return list(map( uuid.UUID, elem ))
 
     def get_sensor_info( self, msg ):
         info = {}
@@ -175,7 +175,7 @@ class ModelView( Actor ):
             relToId[ ObjectKey( RelationNameFromId( info[ 'id' ], child ), ObjectTypes.RELATION ) ] = child
 
         onHost = {}
-        for o in HostObjects( relToId.keys() ).locs():
+        for o in HostObjects( list(relToId.keys()) ).locs():
             if relToId[ o[ 0 ] ] not in tmplocs:
                 tmplocs[ relToId[ o[ 0 ] ] ] = 0
             tmplocs[ relToId[ o[ 0 ] ] ] += 1
@@ -183,7 +183,7 @@ class ModelView( Actor ):
                 onHost[ o[ 0 ] ] = 1
 
         if 0 != len( onHost ):
-            for k in tmplocs.keys():
+            for k in list(tmplocs.keys()):
                 if k not in onHost:
                     info[ 'children' ].remove( relToId[ k ] )
                     del( tmplocs[ k ] )
@@ -196,7 +196,7 @@ class ModelView( Actor ):
             relToId[ ObjectKey( RelationNameFromId( parent, info[ 'id' ] ), ObjectTypes.RELATION ) ] = parent
 
         onHost = {}
-        for o in HostObjects( relToId.keys() ).locs():
+        for o in HostObjects( list(relToId.keys()) ).locs():
             if relToId[ o[ 0 ] ] not in tmplocs:
                 tmplocs[ relToId[ o[ 0 ] ] ] = 0
             tmplocs[ relToId[ o[ 0 ] ] ] += 1
@@ -204,7 +204,7 @@ class ModelView( Actor ):
                 onHost[ o[ 0 ] ] = 1
 
         if 0 != len( onHost ):
-            for k in tmplocs.keys():
+            for k in list(tmplocs.keys()):
                 if k not in onHost:
                     info[ 'parents' ].remove( relToId[ k ] )
                     del( tmplocs[ k ] )
@@ -286,7 +286,7 @@ class ModelView( Actor ):
 
         if isWithInv:
             inv = Reporting.getInvestigations( id = detect[ 1 ] )
-            for i in inv.itervalues():
+            for i in inv.values():
                 for d in i[ 'data' ]:
                     d[ 'data' ] = FluxEvent.decode( d[ 'data' ], isFullDump = True )
                 for t in i[ 'tasks' ]:

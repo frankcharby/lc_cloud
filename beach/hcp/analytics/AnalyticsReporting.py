@@ -74,7 +74,7 @@ class AnalyticsReporting( Actor ):
 
         self.paging = CreateOnAccess( self.getActorHandle, resources[ 'paging' ], timeout = 30 )
         self.pageDest = parameters.get( 'paging_dest', [] )
-        if type( self.pageDest ) is str or type( self.pageDest ) is unicode:
+        if type( self.pageDest ) is str or type( self.pageDest ) is str:
             self.pageDest = [ self.pageDest ]
 
         self.model = CreateOnAccess( self.getActorHandle, resources[ 'modeling' ], timeout = 30 )
@@ -154,7 +154,7 @@ class AnalyticsReporting( Actor ):
         info = self.model.request( 'get_detect', { 'id' : invId, 'with_inv' : True } )
         investigations = []
         if info.isSuccess:
-            investigations = info.data[ 'inv' ].values()
+            investigations = list(info.data[ 'inv' ].values())
         for inv in investigations:
             if inv[ 'hunter' ] == hunter:
                 inv[ 'source' ] = source

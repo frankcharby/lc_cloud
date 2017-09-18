@@ -47,8 +47,8 @@ class EventObjectExtractor:
 
         objects = { 'obj' : {}, 'rel' : {} }
 
-        eventType = event.keys()[ 0 ]
-        eventRoot = event.values()[ 0 ]
+        eventType = list(event.keys())[ 0 ]
+        eventRoot = list(event.values())[ 0 ]
 
         if eventType not in cls._extractors: return objects
 
@@ -126,9 +126,9 @@ class EventObjectExtractor:
     @classmethod
     def _convertToNormalForm( cls, objects, isCaseSensitive ):
         k = []
-        for oType in objects[ 'obj' ].keys():
+        for oType in list(objects[ 'obj' ].keys()):
             objects[ 'obj' ][ oType ] = [ ObjectNormalForm( x, oType, isCaseSensitive = isCaseSensitive ) for x in objects[ 'obj' ][ oType ] ]
-        for ( parentType, childType ) in objects[ 'rel' ].keys():
+        for ( parentType, childType ) in list(objects[ 'rel' ].keys()):
             objects[ 'rel' ][ ( parentType, childType ) ] = [ ( ObjectNormalForm( x[ 0 ], 
                                                                                   parentType, 
                                                                                   isCaseSensitive = isCaseSensitive ), 

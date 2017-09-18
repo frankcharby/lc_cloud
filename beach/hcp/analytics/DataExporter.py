@@ -21,7 +21,7 @@ import base64
 import time
 import msgpack
 import zipfile
-import StringIO
+import io
 
 AgentId = Actor.importLib( '../utils/hcp_helpers', 'AgentId' )
 
@@ -36,7 +36,7 @@ class DataExporter( Actor ):
 
     def sanitizeJson( self, o ):
         if type( o ) is dict:
-            for k, v in o.iteritems():
+            for k, v in o.items():
                 o[ k ] = self.sanitizeJson( v )
         elif type( o ) is list or type( o ) is tuple:
             o = [ self.sanitizeJson( x ) for x in o ]
@@ -44,7 +44,7 @@ class DataExporter( Actor ):
             o = str( o )
         else:
             try:
-                if ( type(o) is str or type(o) is unicode ) and "\x00" in o: raise Exception()
+                if ( type(o) is str or type(o) is str ) and "\x00" in o: raise Exception()
                 json.dumps( o )
             except:
                 o = base64.b64encode( o )
@@ -55,7 +55,7 @@ class DataExporter( Actor ):
         isEntry = newRoot is None
         if isEntry: newRoot = {}
         if type( o ) is dict:
-            for k, v in o.iteritems():
+            for k, v in o.items():
                 if -1 != k.find( '.' ):
                     newK = k[ k.find( '.' ) + 1 : ]
                 else:
@@ -114,7 +114,7 @@ class DataExporter( Actor ):
             if not isJson:
                 output = msgpack.packb( output )
 
-            zOutput = StringIO.StringIO()
+            zOutput = io.StringIO()
             exportName = '%s_%s_%s.%s' % ( sid, after, before, ( "json" if isJson else "dat" ) )
             with zipfile.ZipFile( zOutput, 'w', compression = zipfile.ZIP_DEFLATED ) as zf:
                 if not isJson:

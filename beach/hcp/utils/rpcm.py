@@ -51,7 +51,7 @@ class rSequence( dict ):
         return self
     
     def addStringW( self, tag, value ):
-        self[ tag ] = { 'tag' : tag, 'value' : unicode( value ), 'type' : rpcm.RPCM_STRINGW }
+        self[ tag ] = { 'tag' : tag, 'value' : str( value ), 'type' : rpcm.RPCM_STRINGW }
         return self
     
     def addBuffer( self, tag, value ):
@@ -117,7 +117,7 @@ class rList( list ):
         return self
     
     def addStringW( self, tag, value ):
-        self.append( { 'tag' : tag, 'value' : unicode( value ), 'type' : rpcm.RPCM_STRINGW } )
+        self.append( { 'tag' : tag, 'value' : str( value ), 'type' : rpcm.RPCM_STRINGW } )
         return self
     
     def addBuffer( self, tag, value ):
@@ -377,7 +377,7 @@ class rpcm( object ):
         elif type( j ) is dict:
             res = rSequence()
             
-            for tag, val in j.iteritems():
+            for tag, val in j.items():
                 res[ tag ] = self._json_to_rpcm( val )
         else:
             self._printDebug( 'unexpected structure in json to rpcm: %s' % str( j ) )
@@ -468,10 +468,10 @@ class rpcm( object ):
                 if None != tmpElem:
                     if isList:
                         self._printTrace( 'adding new element in list' )
-                        s.append( tmpElem.values()[ 0 ] )
+                        s.append( list(tmpElem.values())[ 0 ] )
                     else:
                         self._printTrace( 'adding new element to seq' )
-                        s = rSequence( s.items() + tmpElem.items() )
+                        s = rSequence( list(s.items()) + list(tmpElem.items()) )
                 else:
                     s = None
                     self._printTrace( 'no element could be parsed' )
@@ -562,7 +562,7 @@ class rpcm( object ):
             if isList:
                 values = value
             else:
-                values = value.values()
+                values = list(value.values())
                 
             for elem in values:
                 s += self._serialise_element( elem )
@@ -635,7 +635,7 @@ class rpcm( object ):
         self._symbols = symbolsDict
 
     def loadJson( self, jStr ):
-        if type( jStr ) is str or type( jStr ) is unicode:
+        if type( jStr ) is str or type( jStr ) is str:
             j = json.loads( jStr )
         else:
             j = jStr

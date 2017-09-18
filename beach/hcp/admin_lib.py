@@ -22,8 +22,8 @@ try:
     from rpcm import rpcm
     from rpcm import rSequence
     from rpcm import rList
-    from Symbols import Symbols
-    from signing import Signing
+    from .Symbols import Symbols
+    from .signing import Signing
     from hcp_helpers import AgentId
 except:
     # When in an actor, use the relative import

@@ -1,0 +1,1511 @@
+diff -x .git -Naur a/beach/hcp/Detects.py b/beach/hcp/Detects.py
+--- a/beach/hcp/Detects.py	2017-09-18 08:59:05.133486000 -0400
++++ b/beach/hcp/Detects.py	2017-09-17 11:34:43.773643000 -0400
+@@ -135,7 +135,7 @@
+         self._machines.append( StateMachine( desc ) )
+ 
+     def _garbageCollectOldMachines( self ):
+-        for shard in self._compiled_machines.keys():
++        for shard in list(self._compiled_machines.keys()):
+             for machine in self._compiled_machines[ shard ]:
+                 if self._machine_activity[ machine ] < time.time() - self._machine_ttl:
+                     del( self._machine_activity[ machine ] )
+diff -x .git -Naur a/beach/hcp/Hunters.py b/beach/hcp/Hunters.py
+--- a/beach/hcp/Hunters.py	2017-09-18 08:59:05.133486000 -0400
++++ b/beach/hcp/Hunters.py	2017-09-17 11:34:43.930310000 -0400
+@@ -34,7 +34,7 @@
+         self._event = Event()
+     
+     def _add( self, newData ):
+-        if 'hbs.CLOUD_NOTIFICATION' == newData.keys()[ 0 ]:
++        if 'hbs.CLOUD_NOTIFICATION' == list(newData.keys())[ 0 ]:
+             self.wasReceived = True
+         else:
+             self.responses.append( newData )
+@@ -349,14 +349,14 @@
+         resp = self.VirusTotal.request( 'get_report', { 'hash' : fileHash, 'no_cache' : True } )
+         if resp.isSuccess and resp.data[ 'report' ] is not None:
+             report = resp.data[ 'report' ]
+-            for av, res in report.items():
++            for av, res in list(report.items()):
+                 if res is None:
+                     del( report[ av ] )
+ 
+         if report is not None and 0 < len( report ):
+             mdReport = [ '| AV | Result |',
+                          '| -- | ------ |' ]
+-            for av, res in report.iteritems():
++            for av, res in report.items():
+                 mdReport.append( '| %s | %s |' % ( av, res ) )
+         
+         return ( report, '\n'.join( mdReport ) )
+diff -x .git -Naur a/beach/hcp/Hunts.py b/beach/hcp/Hunts.py
+--- a/beach/hcp/Hunts.py	2017-09-18 08:59:05.133486000 -0400
++++ b/beach/hcp/Hunts.py	2017-09-17 11:34:43.983643000 -0400
+@@ -44,7 +44,7 @@
+ 
+     def _regCulling( self ):
+         curTime = int( time.time() )
+-        for name in ( name for name, ts in self._regInvTtl.iteritems() if ts < ( curTime - self._ttl ) ):
++        for name in ( name for name, ts in self._regInvTtl.items() if ts < ( curTime - self._ttl ) ):
+             self._unregisterToInvData( name )
+ 
+     def _registerToDetect( self, detect ):
+diff -x .git -Naur a/beach/hcp/PagingActor.py b/beach/hcp/PagingActor.py
+--- a/beach/hcp/PagingActor.py	2017-09-18 08:59:05.133486000 -0400
++++ b/beach/hcp/PagingActor.py	2017-09-17 11:34:44.016977000 -0400
+@@ -68,7 +68,7 @@
+             return ( False, )
+ 
+     def sendPage( self, dest, subject, message ):
+-        if type( dest ) is str or type( dest ) is unicode:
++        if type( dest ) is str or type( dest ) is str:
+             dest = ( dest, )
+         msg = MIMEMultipart( 'alternative' )
+         dest = ', '.join( dest )
+diff -x .git -Naur a/beach/hcp/admin_cli.py b/beach/hcp/admin_cli.py
+--- a/beach/hcp/admin_cli.py	2017-09-18 08:59:05.133486000 -0400
++++ b/beach/hcp/admin_cli.py	2017-09-17 11:34:44.433643000 -0400
+@@ -29,12 +29,12 @@
+ import uuid
+ 
+ try:
+-    from admin_lib import BEAdmin
++    from .admin_lib import BEAdmin
+     from hcp_helpers import AgentId
+     from rpcm import rSequence
+     from rpcm import rList
+-    from Symbols import Symbols
+-    from signing import Signing
++    from .Symbols import Symbols
++    from .signing import Signing
+ except:
+     from beach.actor import Actor
+     BEAdmin = Actor.importLib( 'admin_lib', 'BEAdmin' )
+@@ -59,7 +59,7 @@
+             try:
+                 return func( *args,**kwargs )
+             except:
+-                print( traceback.format_exc() )
++                print(( traceback.format_exc() ))
+                 syslog.syslog( traceback.format_exc() )
+                 return None
+         else:
+@@ -231,7 +231,7 @@
+ 
+             del( tmp )
+ 
+-        for k, a in vars( arguments ).iteritems():
++        for k, a in vars( arguments ).items():
+             if type( a ) is AgentId:
+                 setattr( arguments, k, str( a ) )
+ 
+@@ -690,7 +690,7 @@
+         agents = self.execAndPrintResponse( self.be.hcp_getAgentStates, getAgentsArg )
+         if agents is not None:
+             if 'agents' in agents:
+-                for aid in agents[ 'agents' ].keys():
++                for aid in list(agents[ 'agents' ].keys()):
+                     self.outputString( "Tasking agent %s: %s" % ( aid, str( arguments ) ) )
+                     arguments.toAgent = AgentId( aid )
+                     self.execAndPrintResponse( self.be.hbs_taskAgent, arguments, True )
+@@ -705,7 +705,7 @@
+ 
+         parser = self.getParser( 'file_get', True )
+         parser.add_argument( 'file',
+-                             type = unicode,
++                             type = str,
+                              help = 'file path to file to get' )
+         arguments = self.parse( parser, s )
+         if arguments is not None:
+@@ -719,7 +719,7 @@
+ 
+         parser = self.getParser( 'file_info', True )
+         parser.add_argument( 'file',
+-                             type = unicode,
++                             type = str,
+                              help = 'file path to file to get info on' )
+         arguments = self.parse( parser, s )
+         if arguments is not None:
+@@ -733,10 +733,10 @@
+ 
+         parser = self.getParser( 'dir_list', True )
+         parser.add_argument( 'rootDir',
+-                             type = unicode,
++                             type = str,
+                              help = 'the root directory where to begin the listing from' )
+         parser.add_argument( 'fileExp',
+-                             type = unicode,
++                             type = str,
+                              help = 'a file name expression supporting basic wildcards like * and ?' )
+         parser.add_argument( '-d', '--depth',
+                              dest = 'depth',
+@@ -757,7 +757,7 @@
+ 
+         parser = self.getParser( 'file_del', True )
+         parser.add_argument( 'file',
+-                             type = unicode,
++                             type = str,
+                              help = 'file path to delete' )
+         arguments = self.parse( parser, s )
+         if arguments is not None:
+@@ -771,10 +771,10 @@
+ 
+         parser = self.getParser( 'file_mov', True )
+         parser.add_argument( 'srcFile',
+-                             type = unicode,
++                             type = str,
+                              help = 'source file path' )
+         parser.add_argument( 'dstFile',
+-                             type = unicode,
++                             type = str,
+                              help = 'destination file path' )
+         arguments = self.parse( parser, s )
+         if arguments is not None:
+@@ -789,7 +789,7 @@
+ 
+         parser = self.getParser( 'file_hash', True )
+         parser.add_argument( 'file',
+-                             type = unicode,
++                             type = str,
+                              help = 'file path to hash' )
+         arguments = self.parse( parser, s )
+         if arguments is not None:
+@@ -1026,7 +1026,7 @@
+                              type = int,
+                              help = 'pid of the process to search in' )
+         parser.add_argument( '-s', '--strings',
+-                             type = unicode,
++                             type = str,
+                              required = True,
+                              nargs = '*',
+                              dest = 'strings',
+@@ -1048,7 +1048,7 @@
+ 
+         parser = self.getParser( 'mem_find_handle', True )
+         parser.add_argument( 'needle',
+-                             type = unicode,
++                             type = str,
+                              help = 'substring of the handle names to get' )
+         arguments = self.parse( parser, s )
+         if arguments is not None:
+@@ -1240,12 +1240,12 @@
+                              dest = 'pid',
+                              help = 'pid of the process to scan' )
+         parser.add_argument( '-f', '--filePath',
+-                             type = unicode,
++                             type = str,
+                              required = False,
+                              dest = 'filePath',
+                              help = 'path of the file to scan' )
+         parser.add_argument( '-e', '--processExpr',
+-                             type = unicode,
++                             type = str,
+                              required = False,
+                              dest = 'proc',
+                              help = 'expression to match on to scan (matches on full process path)' )
+diff -x .git -Naur a/beach/hcp/admin_lib.py b/beach/hcp/admin_lib.py
+--- a/beach/hcp/admin_lib.py	2017-09-18 08:59:05.133486000 -0400
++++ b/beach/hcp/admin_lib.py	2017-09-17 11:34:44.506977000 -0400
+@@ -22,8 +22,8 @@
+     from rpcm import rpcm
+     from rpcm import rSequence
+     from rpcm import rList
+-    from Symbols import Symbols
+-    from signing import Signing
++    from .Symbols import Symbols
++    from .signing import Signing
+     from hcp_helpers import AgentId
+ except:
+     # When in an actor, use the relative import
+diff -x .git -Naur a/beach/hcp/analytics/AlexaDNS.py b/beach/hcp/analytics/AlexaDNS.py
+--- a/beach/hcp/analytics/AlexaDNS.py	2017-09-18 08:59:05.133486000 -0400
++++ b/beach/hcp/analytics/AlexaDNS.py	2017-09-17 11:34:44.560310000 -0400
+@@ -13,9 +13,9 @@
+ # limitations under the License.
+ 
+ from beach.actor import Actor
+-import urllib2
++import urllib.request, urllib.error, urllib.parse
+ from zipfile import ZipFile
+-from StringIO import StringIO
++from io import StringIO
+ import tld
+ import tld.utils
+ 
+@@ -33,7 +33,7 @@
+         pass
+ 
+     def refreshDomains( self ):
+-        response = urllib2.urlopen( urllib2.Request( self.domain, 
++        response = urllib.request.urlopen( urllib.request.Request( self.domain, 
+                                                      headers = { 'User-Agent': 'LimaCharlie' } ) ).read()
+         z = ZipFile( StringIO( response ) )
+         content = z.read( z.namelist()[ 0 ] )
+diff -x .git -Naur a/beach/hcp/analytics/AnalyticsInvestigation.py b/beach/hcp/analytics/AnalyticsInvestigation.py
+--- a/beach/hcp/analytics/AnalyticsInvestigation.py	2017-09-18 08:59:05.133486000 -0400
++++ b/beach/hcp/analytics/AnalyticsInvestigation.py	2017-09-17 11:34:44.600310000 -0400
+@@ -32,7 +32,7 @@
+ 
+     def invCulling( self ):
+         curTime = int( time.time() )
+-        inv_ids = [ inv_id for inv_id, ts in self.handleTtl.iteritems() if ts < ( curTime - self.ttl ) ]
++        inv_ids = [ inv_id for inv_id, ts in self.handleTtl.items() if ts < ( curTime - self.ttl ) ]
+         for inv_id in inv_ids:
+             self.handleCache[ inv_id ].close()
+             del( self.handleCache[ inv_id ] )
+diff -x .git -Naur a/beach/hcp/analytics/AnalyticsModeling.py b/beach/hcp/analytics/AnalyticsModeling.py
+--- a/beach/hcp/analytics/AnalyticsModeling.py	2017-09-18 08:59:05.133486000 -0400
++++ b/beach/hcp/analytics/AnalyticsModeling.py	2017-09-17 11:34:44.693643000 -0400
+@@ -117,7 +117,7 @@
+     def _ingestObjects( self, ttls, sid, ts, objects, relations, oid ):
+         ts = datetime.datetime.fromtimestamp( ts )
+ 
+-        for relType, relVals in relations.iteritems():
++        for relType, relVals in relations.items():
+             for relVal in relVals:
+                 objects.setdefault( ObjectTypes.RELATION, [] ).append( RelationName( relVal[ 0 ],
+                                                                                      relType[ 0 ],
+@@ -139,7 +139,7 @@
+                                                                          ObjectKey( relVal[ 0 ], relType[ 0 ] ),
+                                                                          ttl ) ) )
+ 
+-        for objType, objVals in objects.iteritems():
++        for objType, objVals in objects.items():
+             for objVal in objVals:
+                 k = ObjectKey( objVal, objType )
+ 
+@@ -255,7 +255,7 @@
+         for ignored in self.ignored_objects:
+             if ignored in new_objects:
+                 del( new_objects[ ignored ] )
+-            for k in new_relations.keys():
++            for k in list(new_relations.keys()):
+                 if ignored in k:
+                     del( new_relations[ k ] )
+ 
+diff -x .git -Naur a/beach/hcp/analytics/AnalyticsReporting.py b/beach/hcp/analytics/AnalyticsReporting.py
+--- a/beach/hcp/analytics/AnalyticsReporting.py	2017-09-18 08:59:05.133486000 -0400
++++ b/beach/hcp/analytics/AnalyticsReporting.py	2017-09-17 11:34:44.790310000 -0400
+@@ -74,7 +74,7 @@
+ 
+         self.paging = CreateOnAccess( self.getActorHandle, resources[ 'paging' ], timeout = 30 )
+         self.pageDest = parameters.get( 'paging_dest', [] )
+-        if type( self.pageDest ) is str or type( self.pageDest ) is unicode:
++        if type( self.pageDest ) is str or type( self.pageDest ) is str:
+             self.pageDest = [ self.pageDest ]
+ 
+         self.model = CreateOnAccess( self.getActorHandle, resources[ 'modeling' ], timeout = 30 )
+@@ -154,7 +154,7 @@
+         info = self.model.request( 'get_detect', { 'id' : invId, 'with_inv' : True } )
+         investigations = []
+         if info.isSuccess:
+-            investigations = info.data[ 'inv' ].values()
++            investigations = list(info.data[ 'inv' ].values())
+         for inv in investigations:
+             if inv[ 'hunter' ] == hunter:
+                 inv[ 'source' ] = source
+diff -x .git -Naur a/beach/hcp/analytics/AutoTasking.py b/beach/hcp/analytics/AutoTasking.py
+--- a/beach/hcp/analytics/AutoTasking.py	2017-09-18 08:59:05.136820000 -0400
++++ b/beach/hcp/analytics/AutoTasking.py	2017-09-17 11:34:44.950310000 -0400
+@@ -75,7 +75,7 @@
+         return cli
+ 
+     def decay( self ):
+-        for k in self.sensor_stats.iterkeys():
++        for k in self.sensor_stats.keys():
+             self.sensor_stats[ k ] = 0
+         self.global_stats = 0
+ 
+diff -x .git -Naur a/beach/hcp/analytics/BlinkModel.py b/beach/hcp/analytics/BlinkModel.py
+--- a/beach/hcp/analytics/BlinkModel.py	2017-09-18 08:59:05.136820000 -0400
++++ b/beach/hcp/analytics/BlinkModel.py	2017-09-17 11:34:45.016977000 -0400
+@@ -113,7 +113,7 @@
+         if report is not None:
+             report = json.loads( report[ 0 ] )
+             hits = 0
+-            for av, r in report.iteritems():
++            for av, r in report.items():
+                 if r is not None:
+                     hits += 1
+             if hits > 2:
+diff -x .git -Naur a/beach/hcp/analytics/CEFDetectsOutput.py b/beach/hcp/analytics/CEFDetectsOutput.py
+--- a/beach/hcp/analytics/CEFDetectsOutput.py	2017-09-18 08:59:05.136820000 -0400
++++ b/beach/hcp/analytics/CEFDetectsOutput.py	2017-09-17 11:34:45.043643000 -0400
+@@ -48,13 +48,13 @@
+         record = 'CEF:0|refractionPOINT|LimaCharlie|1|%s|%s|%s|' % ( category, summary, priority )
+         extension = { 'rpLCFullDetails' : detect,
+                       'rpLCLink' : 'http://%s/detect?id=%s' % ( self._lc_web, detect_id ),
+-                      'rpLCHostnames' : ','.join( map( lambda x: Host( x ).getHostName(), source ) ) }
++                      'rpLCHostnames' : ','.join( [Host( x ).getHostName() for x in source] ) }
+ 
+         # Try to parse out common datatypes
+         # For now we'll only populate the details.
+ 
+-        for k, v in extension.iteritems():
+-            v = unicode( v )
++        for k, v in extension.items():
++            v = str( v )
+             record += '%s=%s ' % ( k, v.replace( r'\\', r'\\\\' )
+                                        .replace( r'=', r'\=' )
+                                        .replace( '\r\n', r'\r\n' )
+diff -x .git -Naur a/beach/hcp/analytics/CapabilityManager.py b/beach/hcp/analytics/CapabilityManager.py
+--- a/beach/hcp/analytics/CapabilityManager.py	2017-09-18 08:59:05.136820000 -0400
++++ b/beach/hcp/analytics/CapabilityManager.py	2017-09-17 11:34:45.110310000 -0400
+@@ -17,7 +17,7 @@
+ 
+ Mutex = Actor.importLib( '../utils/hcp_helpers', 'Mutex' )
+ 
+-import urllib2
++import urllib.request, urllib.error, urllib.parse
+ import json
+ import tempfile
+ 
+@@ -119,7 +119,7 @@
+                     url = 'file://%s' % tmpPatrol.name
+                     tmpPatrol.close()
+ 
+-            capability = urllib2.urlopen( url ).read()
++            capability = urllib.request.urlopen( url ).read()
+ 
+             summary = self.getDetectionMtdFromContent( capability )
+             if summary is not None:
+diff -x .git -Naur a/beach/hcp/analytics/DataExporter.py b/beach/hcp/analytics/DataExporter.py
+--- a/beach/hcp/analytics/DataExporter.py	2017-09-18 08:59:05.136820000 -0400
++++ b/beach/hcp/analytics/DataExporter.py	2017-09-17 11:34:45.160310000 -0400
+@@ -21,7 +21,7 @@
+ import time
+ import msgpack
+ import zipfile
+-import StringIO
++import io
+ 
+ AgentId = Actor.importLib( '../utils/hcp_helpers', 'AgentId' )
+ 
+@@ -36,7 +36,7 @@
+ 
+     def sanitizeJson( self, o ):
+         if type( o ) is dict:
+-            for k, v in o.iteritems():
++            for k, v in o.items():
+                 o[ k ] = self.sanitizeJson( v )
+         elif type( o ) is list or type( o ) is tuple:
+             o = [ self.sanitizeJson( x ) for x in o ]
+@@ -44,7 +44,7 @@
+             o = str( o )
+         else:
+             try:
+-                if ( type(o) is str or type(o) is unicode ) and "\x00" in o: raise Exception()
++                if ( type(o) is str or type(o) is str ) and "\x00" in o: raise Exception()
+                 json.dumps( o )
+             except:
+                 o = base64.b64encode( o )
+@@ -55,7 +55,7 @@
+         isEntry = newRoot is None
+         if isEntry: newRoot = {}
+         if type( o ) is dict:
+-            for k, v in o.iteritems():
++            for k, v in o.items():
+                 if -1 != k.find( '.' ):
+                     newK = k[ k.find( '.' ) + 1 : ]
+                 else:
+@@ -114,7 +114,7 @@
+             if not isJson:
+                 output = msgpack.packb( output )
+ 
+-            zOutput = StringIO.StringIO()
++            zOutput = io.StringIO()
+             exportName = '%s_%s_%s.%s' % ( sid, after, before, ( "json" if isJson else "dat" ) )
+             with zipfile.ZipFile( zOutput, 'w', compression = zipfile.ZIP_DEFLATED ) as zf:
+                 if not isJson:
+diff -x .git -Naur a/beach/hcp/analytics/FileEventsOutput.py b/beach/hcp/analytics/FileEventsOutput.py
+--- a/beach/hcp/analytics/FileEventsOutput.py	2017-09-18 08:59:05.136820000 -0400
++++ b/beach/hcp/analytics/FileEventsOutput.py	2017-09-17 11:34:45.206977000 -0400
+@@ -48,7 +48,7 @@
+ 
+     def sanitizeJson( self, o ):
+         if type( o ) is dict:
+-            for k, v in o.iteritems():
++            for k, v in o.items():
+                 o[ k ] = self.sanitizeJson( v )
+         elif type( o ) is list or type( o ) is tuple:
+             o = [ self.sanitizeJson( x ) for x in o ]
+@@ -56,7 +56,7 @@
+             o = str( o )
+         else:
+             try:
+-                if ( type(o) is str or type(o) is unicode ) and "\x00" in o: raise Exception()
++                if ( type(o) is str or type(o) is str ) and "\x00" in o: raise Exception()
+                 json.dumps( o )
+             except:
+                 o = base64.b64encode( o )
+@@ -67,7 +67,7 @@
+         isEntry = newRoot is None
+         if isEntry: newRoot = {}
+         if type( o ) is dict:
+-            for k, v in o.iteritems():
++            for k, v in o.items():
+                 if -1 != k.find( '.' ):
+                     newK = k[ k.find( '.' ) + 1 : ]
+                 else:
+@@ -105,8 +105,7 @@
+         return ( True, )
+ 
+     def reportDetectOrInv( self, msg ):
+-        msg.data[ 'hostnames' ] = map( lambda x: Host( x ).getHostName(), 
+-                                       msg.data[ 'source' ].split( ' / ' ) )
++        msg.data[ 'hostnames' ] = [Host( x ).getHostName() for x in msg.data[ 'source' ].split( ' / ' )]
+ 
+         record = msg.data
+ 
+diff -x .git -Naur a/beach/hcp/analytics/MalwareDomains.py b/beach/hcp/analytics/MalwareDomains.py
+--- a/beach/hcp/analytics/MalwareDomains.py	2017-09-18 08:59:05.136820000 -0400
++++ b/beach/hcp/analytics/MalwareDomains.py	2017-09-17 11:34:45.253643000 -0400
+@@ -13,9 +13,9 @@
+ # limitations under the License.
+ 
+ from beach.actor import Actor
+-import urllib2
++import urllib.request, urllib.error, urllib.parse
+ from zipfile import ZipFile
+-from StringIO import StringIO
++from io import StringIO
+ 
+ class MalwareDomains ( Actor ):
+     def init( self, parameters, resources ):
+@@ -29,7 +29,7 @@
+         pass
+ 
+     def refreshDomains( self ):
+-        z = ZipFile( StringIO( urllib2.urlopen( urllib2.Request( self.domain, 
++        z = ZipFile( StringIO( urllib.request.urlopen( urllib.request.Request( self.domain, 
+                                                                  headers = { 'User-Agent': 'LimaCharlie' } ) ).read() ) )
+ 
+         tmpDomains = {}
+diff -x .git -Naur a/beach/hcp/analytics/ModelView.py b/beach/hcp/analytics/ModelView.py
+--- a/beach/hcp/analytics/ModelView.py	2017-09-18 08:59:05.136820000 -0400
++++ b/beach/hcp/analytics/ModelView.py	2017-09-17 11:34:45.433643000 -0400
+@@ -66,7 +66,7 @@
+     def asUuidList( self, elem ):
+         if type( elem ) not in ( list, tuple ):
+             elem = [ elem ]
+-        return map( uuid.UUID, elem )
++        return list(map( uuid.UUID, elem ))
+ 
+     def get_sensor_info( self, msg ):
+         info = {}
+@@ -175,7 +175,7 @@
+             relToId[ ObjectKey( RelationNameFromId( info[ 'id' ], child ), ObjectTypes.RELATION ) ] = child
+ 
+         onHost = {}
+-        for o in HostObjects( relToId.keys() ).locs():
++        for o in HostObjects( list(relToId.keys()) ).locs():
+             if relToId[ o[ 0 ] ] not in tmplocs:
+                 tmplocs[ relToId[ o[ 0 ] ] ] = 0
+             tmplocs[ relToId[ o[ 0 ] ] ] += 1
+@@ -183,7 +183,7 @@
+                 onHost[ o[ 0 ] ] = 1
+ 
+         if 0 != len( onHost ):
+-            for k in tmplocs.keys():
++            for k in list(tmplocs.keys()):
+                 if k not in onHost:
+                     info[ 'children' ].remove( relToId[ k ] )
+                     del( tmplocs[ k ] )
+@@ -196,7 +196,7 @@
+             relToId[ ObjectKey( RelationNameFromId( parent, info[ 'id' ] ), ObjectTypes.RELATION ) ] = parent
+ 
+         onHost = {}
+-        for o in HostObjects( relToId.keys() ).locs():
++        for o in HostObjects( list(relToId.keys()) ).locs():
+             if relToId[ o[ 0 ] ] not in tmplocs:
+                 tmplocs[ relToId[ o[ 0 ] ] ] = 0
+             tmplocs[ relToId[ o[ 0 ] ] ] += 1
+@@ -204,7 +204,7 @@
+                 onHost[ o[ 0 ] ] = 1
+ 
+         if 0 != len( onHost ):
+-            for k in tmplocs.keys():
++            for k in list(tmplocs.keys()):
+                 if k not in onHost:
+                     info[ 'parents' ].remove( relToId[ k ] )
+                     del( tmplocs[ k ] )
+@@ -286,7 +286,7 @@
+ 
+         if isWithInv:
+             inv = Reporting.getInvestigations( id = detect[ 1 ] )
+-            for i in inv.itervalues():
++            for i in inv.values():
+                 for d in i[ 'data' ]:
+                     d[ 'data' ] = FluxEvent.decode( d[ 'data' ], isFullDump = True )
+                 for t in i[ 'tasks' ]:
+diff -x .git -Naur a/beach/hcp/analytics/SlackRep.py b/beach/hcp/analytics/SlackRep.py
+--- a/beach/hcp/analytics/SlackRep.py	2017-09-18 08:59:05.136820000 -0400
++++ b/beach/hcp/analytics/SlackRep.py	2017-09-17 11:34:45.796977000 -0400
+@@ -43,7 +43,7 @@
+         self._event = Event()
+     
+     def _add( self, newData ):
+-        if 'hbs.CLOUD_NOTIFICATION' == newData.keys()[ 0 ]:
++        if 'hbs.CLOUD_NOTIFICATION' == list(newData.keys())[ 0 ]:
+             self.wasReceived = True
+         else:
+             self.responses.append( newData )
+@@ -168,14 +168,14 @@
+ 
+             while not stopEvent.wait( 1.0 ):
+                 for slackMessage in self.tryToRead():
+-                    message = unicode( slackMessage.get( 'text' ) )
++                    message = str( slackMessage.get( 'text' ) )
+                     fromUser = slackMessage.get( 'user' )
+                     channel = slackMessage.get( 'channel' )
+                     if not message or not fromUser or ( '<@%s>' % self.botId ) not in message:
+                         continue
+                     # Fixing silly quotes form unicode to ascii
+-                    message = message.replace( u'\u201c', '"' )
+-                    message = message.replace( u'\u201d', '"' )
++                    message = message.replace( '\u201c', '"' )
++                    message = message.replace( '\u201d', '"' )
+                     try:
+                         ctx = CommandContext( channel, 
+                                               fromUser, 
+@@ -273,7 +273,7 @@
+             data = self.getModelData( 'get_obj_list', { 'orgs' : self.oid, 'name' : ctx.cmd[ 1 ] } )
+             if data is not None:
+                 self.bot.rtm_send_message( ctx.channel, "here are the objects matching:\n%s\n(valid object types: %s)" % 
+-                                                        ( self.prettyJson( [ x for x in data[ 'objects' ] if 'RELATION' != x[ 2 ] ] ), str( ObjectTypes.forward.keys() ) ) )
++                                                        ( self.prettyJson( [ x for x in data[ 'objects' ] if 'RELATION' != x[ 2 ] ] ), str( list(ObjectTypes.forward.keys()) ) ) )
+         elif 4 <= len( ctx.cmd ):
+             # Query for a characteristic of the object
+             if '.' == ctx.cmd[ 3 ]:
+@@ -342,7 +342,7 @@
+         osxOnline = 0
+         linOnline = 0
+         onlineSensors = []
+-        for sid, sensorInfo in orgSensors.iteritems():
++        for sid, sensorInfo in orgSensors.items():
+             aid = AgentId( sensorInfo[ 'aid' ] )
+             isOnline = False
+             if sid in sensorDir:
+@@ -525,7 +525,7 @@
+ 
+     def sanitizeJson( self, o ):
+         if type( o ) is dict:
+-            for k, v in o.iteritems():
++            for k, v in o.items():
+                 o[ k ] = self.sanitizeJson( v )
+         elif type( o ) is list or type( o ) is tuple:
+             o = [ self.sanitizeJson( x ) for x in o ]
+@@ -533,7 +533,7 @@
+             o = str( o )
+         else:
+             try:
+-                if ( type(o) is str or type(o) is unicode ) and "\x00" in o: raise Exception()
++                if ( type(o) is str or type(o) is str ) and "\x00" in o: raise Exception()
+                 json.dumps( o )
+             except:
+                 o = base64.b64encode( o )
+@@ -610,7 +610,7 @@
+             return None
+ 
+     def msTsToTime( self, ts ):
+-        if type( ts ) in ( str, unicode ):
++        if type( ts ) in ( str, str ):
+             ts = ts.split( '.' )[ 0 ]
+         return datetime.datetime.fromtimestamp( float( ts ) / 1000 ).strftime( '%Y-%m-%d %H:%M:%S.%f' )
+ 
+diff -x .git -Naur a/beach/hcp/analytics/StateAnalysis/descriptors.py b/beach/hcp/analytics/StateAnalysis/descriptors.py
+--- a/beach/hcp/analytics/StateAnalysis/descriptors.py	2017-09-18 08:59:05.136820000 -0400
++++ b/beach/hcp/analytics/StateAnalysis/descriptors.py	2017-09-17 11:34:46.060310000 -0400
+@@ -31,7 +31,7 @@
+ 
+ def ProcessBurst( name, priority, summary, procRegExp, nPerBurst, withinMilliSeconds ):
+     states = []
+-    for i in xrange( 0, nPerBurst ):
++    for i in range( 0, nPerBurst ):
+         states.append( State( StateTransition( isRecordOnMatch = True, 
+                                                isReportOnMatch = False if i < nPerBurst - 1 else True,
+                                                toState = i + 1 if i < nPerBurst - 1 else 0, 
+@@ -93,7 +93,7 @@
+ 
+ def EventBurst( name, priority, summary, eventType, nPerBurst, withinMilliSeconds ):
+     states = []
+-    for i in xrange( 0, nPerBurst ):
++    for i in range( 0, nPerBurst ):
+         states.append( State( StateTransition( isRecordOnMatch = True, 
+                                                isReportOnMatch = False if i < nPerBurst else True,
+                                                toState = i + 1 if i < nPerBurst - 1 else 0, 
+diff -x .git -Naur a/beach/hcp/analytics/StateAnalysis/transitions.py b/beach/hcp/analytics/StateAnalysis/transitions.py
+--- a/beach/hcp/analytics/StateAnalysis/transitions.py	2017-09-18 08:59:05.136820000 -0400
++++ b/beach/hcp/analytics/StateAnalysis/transitions.py	2017-09-17 11:34:46.096977000 -0400
+@@ -88,9 +88,9 @@
+         if currentPid is not None:
+             proc = indexes[ 'pid' ].get( currentPid, None )
+             if proc is not None:
+-                for idx in indexes.values():
++                for idx in list(indexes.values()):
+                     if type( idx ) is dict:
+-                        for idxKey, idxVal in idx.items():
++                        for idxKey, idxVal in list(idx.items()):
+                             if idxVal == proc:
+                                 del( idx[ idxKey ] )
+                                 break
+diff -x .git -Naur a/beach/hcp/analytics/StatsComputer.py b/beach/hcp/analytics/StatsComputer.py
+--- a/beach/hcp/analytics/StatsComputer.py	2017-09-18 08:59:05.136820000 -0400
++++ b/beach/hcp/analytics/StatsComputer.py	2017-09-17 11:34:45.833643000 -0400
+@@ -65,7 +65,7 @@
+         platforms = {}
+ 
+         # Count the number of hosts per platform
+-        agents = [ AgentId( x ) for x in self.be.hcp_getAgentStates().data[ 'agents' ].keys() ]
++        agents = [ AgentId( x ) for x in list(self.be.hcp_getAgentStates().data[ 'agents' ].keys()) ]
+         for agent in agents:
+             platforms.setdefault( agent.platform, 0 )
+             platforms[ agent.platform ] += 1
+@@ -76,9 +76,9 @@
+ 
+         # Remove all process objects that were not on X% of hosts of that platform
+         highCertaintyObjects = {}
+-        for platform, locs in locs.iteritems():
++        for platform, locs in locs.items():
+             curPlatform = platforms[ platform ]
+-            for oid, n in locs.iteritems():
++            for oid, n in locs.items():
+                 # If the object is in at least X% of hosts of that platform consider it
+                 if( ( absoluteParentCoverage is None or n  >= absoluteParentCoverage ) and 
+                     ( float( n ) / curPlatform ) >= parentCoverage ):
+@@ -87,8 +87,8 @@
+         del platforms
+ 
+         # For each of those ubiquitious processes, find all the relationships (parent and child)
+-        for platform, objects in highCertaintyObjects.iteritems():
+-            for oid in objects.iterkeys():
++        for platform, objects in highCertaintyObjects.items():
++            for oid in objects.keys():
+                 # If we are reversed (meaning we center the stats around the child) we flip it around
+                 def _genRelations():
+                     if isReversed:
+@@ -101,7 +101,7 @@
+                 nRel = 0
+                 for rel in _genRelations():
+                     relStats = self._tallyLocStats( HostObjects( rel ).locs(), withPlatform = False )
+-                    for rid, count in relStats.iteritems():
++                    for rid, count in relStats.items():
+                         if parentCoverage < ( float( count ) / highCertaintyObjects[ platform ][ oid ] ):
+                             highCertaintyRelations[ rid ] = count
+                         else:
+@@ -109,5 +109,5 @@
+                         nRel += 1
+                     if ( nFPs <= maxFalsePositives and 
+                        ( float( len( highCertaintyRelations ) ) / nRel ) >= parentCoverage ):
+-                        whitelisted[ oid ] = highCertaintyRelations.keys()
++                        whitelisted[ oid ] = list(highCertaintyRelations.keys())
+         self.lastStats[ ( parentType, childType, isReversed ) ] = whitelisted
+\ No newline at end of file
+diff -x .git -Naur a/beach/hcp/analytics/YaraUpdater.py b/beach/hcp/analytics/YaraUpdater.py
+--- a/beach/hcp/analytics/YaraUpdater.py	2017-09-18 08:59:05.136820000 -0400
++++ b/beach/hcp/analytics/YaraUpdater.py	2017-09-17 11:34:45.933643000 -0400
+@@ -19,9 +19,9 @@
+ 
+ import os
+ import traceback
+-import StringIO
++import io
+ import base64
+-import urllib2
++import urllib.request, urllib.error, urllib.parse
+ import yara
+ 
+ class YaraUpdater ( StatelessActor ):
+@@ -40,7 +40,7 @@
+ 
+         if not os.path.exists( self.rulesDir ):
+             for plat in ( 'common', 'windows', 'osx', 'linux' ):
+-                os.makedirs( os.path.join( self.rulesDir, plat ), 0700 )
++                os.makedirs( os.path.join( self.rulesDir, plat ), 0o700 )
+ 
+         self.schedule( self.dirRefreshFrequency, self.refreshDirRules )
+         self.schedule( self.remoteRefreshFrequency, self.refreshRemoteRules )
+@@ -90,10 +90,10 @@
+             self.log( 'new Yara rules detected, refreshing' )
+ 
+     def refreshRemoteRules( self ):
+-        for name, remote in self.remoteRules.iteritems():
++        for name, remote in self.remoteRules.items():
+             try:
+                 with open( os.path.join( self.rulesDir, name ), 'w' ) as f:
+-                    f.write( urllib2.urlopen( remote ).read() )
++                    f.write( urllib.request.urlopen( remote ).read() )
+                 self.log( 'refreshed remote rules: %s bytes' % os.path.getsize( os.path.join( self.rulesDir, name ) ) )
+             except:
+                 self.logCritical( 'failed to fetch remote rule %s %s' % ( remote, traceback.format_exc() ) )
+diff -x .git -Naur a/beach/hcp/c2/AdminEndpoint.py b/beach/hcp/c2/AdminEndpoint.py
+--- a/beach/hcp/c2/AdminEndpoint.py	2017-09-18 08:59:05.136820000 -0400
++++ b/beach/hcp/c2/AdminEndpoint.py	2017-09-17 11:34:46.256977000 -0400
+@@ -176,7 +176,7 @@
+                 for row in self.db.execute( 'SELECT aid, mid, mhash FROM hcp_module_tasking' ):
+                     # This module is still in use...
+                     deleted.pop( ( row[ 0 ], row[ 1 ] ), None )
+-                for mid, mhash in deleted.keys():
++                for mid, mhash in list(deleted.keys()):
+                     self.db.execute( 'DELETE FROM hcp_modules WHERE mid = %s AND mhash = %s', ( mid, mhash ) )
+ 
+ 
+@@ -302,9 +302,9 @@
+     def cmd_hbs_getProfiles( self, msg ):
+         data = { 'profiles' : [] }
+         oids = msg.data.get( 'oid', [] )
+-        if type( oids ) in ( str, unicode ):
++        if type( oids ) in ( str, str ):
+             oids = [ oids ]
+-        oids = map( uuid.UUID, oids )
++        oids = list(map( uuid.UUID, oids ))
+         if msg.data.get( 'is_compiled', False ):
+             rows = self.db.execute( 'SELECT aid, cprofile FROM hbs_profiles' )
+         else:
+@@ -345,7 +345,7 @@
+                                  'rList' : rList,
+                                  'rSequence' : rSequence,
+                                  'HbsCollectorId' : HbsCollectorId }
+-            if type( c ) in ( str, unicode ):
++            if type( c ) in ( str, str ):
+                 try:
+                     profile = eval( c.replace( '\n', '' ), rpcm_environment )
+                 except:
+diff -x .git -Naur a/beach/hcp/c2/AssistantEndpoint.py b/beach/hcp/c2/AssistantEndpoint.py
+--- a/beach/hcp/c2/AssistantEndpoint.py	2017-09-18 08:59:05.136820000 -0400
++++ b/beach/hcp/c2/AssistantEndpoint.py	2017-09-17 11:34:46.313643000 -0400
+@@ -61,7 +61,7 @@
+     def count_sensors( self, action, params, ctx ):
+         resp = self.Model.request( 'list_sensors', {} )
+         if resp.isSuccess:
+-            sensors = resp.data.keys()
++            sensors = list(resp.data.keys())
+             platform = params.get( 'platform', None )
+             platform = platform if ( platform is not None and platform != '' and platform != 'all' ) else None
+             if platform is not None:
+diff -x .git -Naur a/beach/hcp/c2/AuditManager.py b/beach/hcp/c2/AuditManager.py
+--- a/beach/hcp/c2/AuditManager.py	2017-09-18 08:59:05.136820000 -0400
++++ b/beach/hcp/c2/AuditManager.py	2017-09-17 11:34:46.343643000 -0400
+@@ -45,7 +45,7 @@
+     def asUuidList( self, elem ):
+         if type( elem ) not in ( list, tuple ):
+             elem = [ elem ]
+-        return map( uuid.UUID, elem )
++        return list(map( uuid.UUID, elem ))
+ 
+     def record( self, msg ):
+         req = msg.data
+diff -x .git -Naur a/beach/hcp/c2/DeploymentManager.py b/beach/hcp/c2/DeploymentManager.py
+--- a/beach/hcp/c2/DeploymentManager.py	2017-09-18 08:59:05.136820000 -0400
++++ b/beach/hcp/c2/DeploymentManager.py	2017-09-17 11:34:46.586977000 -0400
+@@ -23,7 +23,7 @@
+ import json
+ import uuid
+ import msgpack
+-import urllib2
++import urllib.request, urllib.error, urllib.parse
+ from zipfile import ZipFile
+ from io import BytesIO
+ import random
+@@ -215,7 +215,7 @@
+         if not info or info[ 0 ] is None or info[ 0 ] == '':
+             self.log( 'no sensor package defined' )
+         else:
+-            pkgUrl = urllib2.urlopen( info[ 0 ] )
++            pkgUrl = urllib.request.urlopen( info[ 0 ] )
+             zipPackage = ZipFile( BytesIO( pkgUrl.read() ) )
+             packages = { name: zipPackage.read( name ) for name in zipPackage.namelist() }
+         return packages
+@@ -305,7 +305,7 @@
+ We believe this sharing policy strikes a good balance between privacy and information sharing between users of the Service allowing for a better visibility and investigative power.
+             '''
+             try:
+-                resp = json.loads( urllib2.urlopen( 'https://api.github.com/repos/refractionPOINT/limacharlie/releases/latest' ).read() )
++                resp = json.loads( urllib.request.urlopen( 'https://api.github.com/repos/refractionPOINT/limacharlie/releases/latest' ).read() )
+                 sensorPackage = resp[ 'assets' ][ 0 ][ 'browser_download_url' ]
+             except:
+                 sensorpackage = ''
+@@ -467,7 +467,7 @@
+         hbsToLoad = {}
+         kernelToLoad = {}
+ 
+-        for binName, binary in sensorPackage.iteritems():
++        for binName, binary in sensorPackage.items():
+             if binName.startswith( 'hcp_' ):
+                 patched = self.setSensorConfig( binary, hcpConfig )
+                 if 'osx' in binName and osxAppBundle is not None:
+@@ -487,7 +487,7 @@
+             self.log( 'error wiping previous installers: %s' % resp )
+             return False
+ 
+-        for binName, binary in installersToLoad.iteritems():
++        for binName, binary in installersToLoad.items():
+             resp = self.admin.request( 'hcp.add_installer', { 'oid' : oid, 
+                                                               'iid' : iid, 
+                                                               'description' : binName, 
+@@ -501,7 +501,7 @@
+             self.log( 'error wiping previous taskings: %s' % resp )
+             return False
+             
+-        for binName, binInfo in hbsToLoad.iteritems():
++        for binName, binInfo in hbsToLoad.items():
+             binary, binSig, binHash = binInfo
+             aid = self.getMaskFor( oid, binName )
+             resp = self.admin.request( 'hcp.add_module', { 'module_id' : HcpModuleId.HBS,
+@@ -519,7 +519,7 @@
+                 self.log( 'error adding new hbs module: %s' % resp )
+                 return False
+ 
+-        for binName, binInfo in kernelToLoad.iteritems():
++        for binName, binInfo in kernelToLoad.items():
+             binary, binSig, binHash = binInfo
+             aid = self.getMaskFor( oid, binName )
+             resp = self.admin.request( 'hcp.add_module', { 'module_id' : HcpModuleId.KERNEL_ACQ,
+@@ -559,7 +559,7 @@
+             'global/policy' : ''
+         }
+ 
+-        info = self.db.execute( 'SELECT conf, value FROM configs WHERE conf IN %s', ( globalConf.keys(), ) )
++        info = self.db.execute( 'SELECT conf, value FROM configs WHERE conf IN %s', ( list(globalConf.keys()), ) )
+ 
+         for row in info:
+             globalConf[ row[ 0 ] ] = row[ 1 ]
+@@ -573,7 +573,7 @@
+             '%s/slack_bot_token' % oid : '',
+         }
+ 
+-        info = self.db.execute( 'SELECT conf, value FROM configs WHERE conf IN %s', ( orgConf.keys(), ) )
++        info = self.db.execute( 'SELECT conf, value FROM configs WHERE conf IN %s', ( list(orgConf.keys()), ) )
+ 
+         for row in info:
+             orgConf[ row[ 0 ] ] = row[ 1 ]
+@@ -662,13 +662,13 @@
+ 
+         profile = SensorConfig()
+ 
+-        for colId, status in req[ 'collectors' ].iteritems():
++        for colId, status in req[ 'collectors' ].items():
+             if status is False:
+                 profile.collectors[ colId ].disable()
+             else:
+                 profile.collectors[ colId ].enable()
+ 
+-        for eventId, status in req[ 'exfil' ].iteritems():
++        for eventId, status in req[ 'exfil' ].items():
+             if status is True:
+                 profile.collectors[ 0 ].addExfil( eventId )
+ 
+@@ -696,7 +696,7 @@
+ 
+     def get_supported_events( self, msg ):
+         allEvents = {}
+-        for attrName, attrVal in Symbols.notification.__dict__.iteritems():
++        for attrName, attrVal in Symbols.notification.__dict__.items():
+             if attrName == 'lookups': continue
+             allEvents[ attrName ] = int( attrVal )
+         return ( True, allEvents )
+\ No newline at end of file
+diff -x .git -Naur a/beach/hcp/c2/EndpointProcessor.py b/beach/hcp/c2/EndpointProcessor.py
+--- a/beach/hcp/c2/EndpointProcessor.py	2017-09-18 08:59:05.136820000 -0400
++++ b/beach/hcp/c2/EndpointProcessor.py	2017-09-17 11:34:46.763643000 -0400
+@@ -417,9 +417,9 @@
+             # Transmit the message to the analytics cloud.
+             routing = { 'aid' : c.getAid(),
+                         'moduleid' : HcpModuleId.HBS,
+-                        'event_type' : message.keys()[ 0 ],
++                        'event_type' : list(message.keys())[ 0 ],
+                         'event_id' : uuid.uuid4() }
+-            invId = message.values()[ 0 ].get( 'hbs.INVESTIGATION_ID', None )
++            invId = list(message.values())[ 0 ].get( 'hbs.INVESTIGATION_ID', None )
+             if invId is not None:
+                 routing[ 'investigation_id' ] = invId
+             self.analyticsIntake.shoot( 'analyze', ( ( routing, message ), ), timeout = 600 )
+diff -x .git -Naur a/beach/hcp/c2/IdentManager.py b/beach/hcp/c2/IdentManager.py
+--- a/beach/hcp/c2/IdentManager.py	2017-09-18 08:59:05.136820000 -0400
++++ b/beach/hcp/c2/IdentManager.py	2017-09-17 11:34:47.036977000 -0400
+@@ -82,7 +82,7 @@
+     def asUuidList( self, elem ):
+         if type( elem ) not in ( list, tuple ):
+             elem = [ elem ]
+-        return map( uuid.UUID, elem )
++        return list(map( uuid.UUID, elem ))
+ 
+     def authenticate( self, msg ):
+         req = msg.data
+@@ -336,8 +336,8 @@
+             for row in info:
+                 membership.setdefault( row[ 0 ], {} ).setdefault( row[ 1 ], None )
+ 
+-        for oid, org in membership.iteritems():
+-            for uid in org.keys():
++        for oid, org in membership.items():
++            for uid in list(org.keys()):
+                 info = self.db.getOne( 'SELECT email, is_deleted FROM user_info WHERE uid = %s', ( uid, ) )
+                 if info is None:
+                     return ( False, 'error getting user info' )
+diff -x .git -Naur a/beach/hcp/c2/ModuleManager.py b/beach/hcp/c2/ModuleManager.py
+--- a/beach/hcp/c2/ModuleManager.py	2017-09-18 08:59:05.136820000 -0400
++++ b/beach/hcp/c2/ModuleManager.py	2017-09-17 11:34:47.080310000 -0400
+@@ -95,11 +95,11 @@
+     		if match is not False:
+     			shouldBeLoaded[ match[ 1 ] ] = match[ 0 ]
+ 
+-    	for hLoaded, iLoaded in loaded.iteritems():
++    	for hLoaded, iLoaded in loaded.items():
+     		if hLoaded not in shouldBeLoaded or iLoaded != shouldBeLoaded[ hLoaded ]:
+     			changes[ 'unload' ].append( iLoaded )
+ 
+-        for hToLoad, iToLoad in shouldBeLoaded.iteritems():
++        for hToLoad, iToLoad in shouldBeLoaded.items():
+             if hToLoad not in loaded or iToLoad != loaded[ hToLoad ]:
+                 dToLoad, sToLoad = self.getModule( iToLoad, hToLoad )
+                 modInfo = ( iToLoad, hToLoad, dToLoad, sToLoad )
+diff -x .git -Naur a/beach/hcp/signing.py b/beach/hcp/signing.py
+--- a/beach/hcp/signing.py	2017-09-18 08:59:05.136820000 -0400
++++ b/beach/hcp/signing.py	2017-09-17 11:34:44.536977000 -0400
+@@ -76,13 +76,13 @@
+     try:
+         s = Signing( arguments.private_key.read() )
+     except:
+-        print( "Error loading key: %s" % traceback.format_exc() )
++        print(( "Error loading key: %s" % traceback.format_exc() ))
+         sys.exit()
+     
+     try:
+         sig = s.sign( arguments.file.read() )
+     except:
+-        print( "Error signing file: %s" % traceback.format_exc() )
++        print(( "Error signing file: %s" % traceback.format_exc() ))
+         sys.exit()
+     
+     try:
+@@ -90,7 +90,7 @@
+         f.write( sig )
+         f.close()
+     except:
+-        print( "Error writing signature to output file: %s" % traceback.format_exc() )
++        print(( "Error writing signature to output file: %s" % traceback.format_exc() ))
+         sys.exit()
+     
+-    print( "Signing file %s with key %s to file %s." % ( arguments.file.name, arguments.private_key.name, output_file ) )
+\ No newline at end of file
++    print(( "Signing file %s with key %s to file %s." % ( arguments.file.name, arguments.private_key.name, output_file ) ))
+\ No newline at end of file
+diff -x .git -Naur a/beach/hcp/utils/EventInterpreter.py b/beach/hcp/utils/EventInterpreter.py
+--- a/beach/hcp/utils/EventInterpreter.py	2017-09-18 08:59:05.136820000 -0400
++++ b/beach/hcp/utils/EventInterpreter.py	2017-09-17 11:34:47.223643000 -0400
+@@ -88,7 +88,7 @@
+ 
+ 	def setEvent( self, event ):
+ 		self.event = event
+-		self.eventType = event.keys()[ 0 ]
++		self.eventType = list(event.keys())[ 0 ]
+ 
+ 	def description( self ):
+ 		return _eventTypes.get( self.eventType, ( None, None, None, None ) )[ 0 ]
+diff -x .git -Naur a/beach/hcp/utils/EventObjectExtractor.py b/beach/hcp/utils/EventObjectExtractor.py
+--- a/beach/hcp/utils/EventObjectExtractor.py	2017-09-18 08:59:05.136820000 -0400
++++ b/beach/hcp/utils/EventObjectExtractor.py	2017-09-17 11:34:47.316977000 -0400
+@@ -47,8 +47,8 @@
+ 
+         objects = { 'obj' : {}, 'rel' : {} }
+ 
+-        eventType = event.keys()[ 0 ]
+-        eventRoot = event.values()[ 0 ]
++        eventType = list(event.keys())[ 0 ]
++        eventRoot = list(event.values())[ 0 ]
+ 
+         if eventType not in cls._extractors: return objects
+ 
+@@ -126,9 +126,9 @@
+     @classmethod
+     def _convertToNormalForm( cls, objects, isCaseSensitive ):
+         k = []
+-        for oType in objects[ 'obj' ].keys():
++        for oType in list(objects[ 'obj' ].keys()):
+             objects[ 'obj' ][ oType ] = [ ObjectNormalForm( x, oType, isCaseSensitive = isCaseSensitive ) for x in objects[ 'obj' ][ oType ] ]
+-        for ( parentType, childType ) in objects[ 'rel' ].keys():
++        for ( parentType, childType ) in list(objects[ 'rel' ].keys()):
+             objects[ 'rel' ][ ( parentType, childType ) ] = [ ( ObjectNormalForm( x[ 0 ], 
+                                                                                   parentType, 
+                                                                                   isCaseSensitive = isCaseSensitive ), 
+diff -x .git -Naur a/beach/hcp/utils/ObjectsDb.py b/beach/hcp/utils/ObjectsDb.py
+--- a/beach/hcp/utils/ObjectsDb.py	2017-09-18 08:59:05.136820000 -0400
++++ b/beach/hcp/utils/ObjectsDb.py	2017-09-17 11:34:47.566977000 -0400
+@@ -47,7 +47,7 @@
+             objName = objName.encode( 'hex' )
+     else:
+         try:
+-            objName = unicode( objName )
++            objName = str( objName )
+             if not isCaseSensitive or objType not in caseSensitiveTypes:
+                 objName = objName.lower()
+             objName = objName.encode( 'utf-8' )
+@@ -234,7 +234,7 @@
+ 
+     @classmethod
+     def matching( cls, ofType, withParents, withChildren ):
+-        if type( ofType ) is str or type( ofType ) is unicode:
++        if type( ofType ) is str or type( ofType ) is str:
+             ofType = ObjectTypes.forward[ ofType ]
+ 
+         def thisGen():
+@@ -269,7 +269,7 @@
+ 
+     @classmethod
+     def _castType( cls, t ):
+-        if type( t ) is str or type( t ) is unicode:
++        if type( t ) is str or type( t ) is str:
+             return ObjectTypes.forward[ t ]
+         else:
+             return int( t )
+@@ -290,8 +290,8 @@
+     def __iter__( self ):
+         return self._ids.__iter__()
+ 
+-    def next( self ):
+-        return self._ids.next()
++    def __next__( self ):
++        return next(self._ids)
+ 
+     def acl( self, oid = None ):
+         if oid is None:
+@@ -416,7 +416,7 @@
+         col = []
+         agents = cls._be.hcp_getAgentStates( aid = mask, hostname = hostname )
+         if agents.isSuccess and 'agents' in agents.data:
+-            col = [ Host( x ) for x in agents.data[ 'agents' ].keys() ]
++            col = [ Host( x ) for x in list(agents.data[ 'agents' ].keys()) ]
+         return col
+ 
+     @classmethod
+@@ -479,7 +479,7 @@
+ 
+         info = self._be.hcp_getAgentStates( aid = self.sid )
+         if info.isSuccess and 'agents' in info.data and 0 != len( info.data[ 'agents' ] ):
+-            info = info.data[ 'agents' ].values()[ 0 ]
++            info = list(info.data[ 'agents' ].values())[ 0 ]
+             hostname = info[ 'last_hostname' ]
+ 
+         return hostname
+@@ -609,7 +609,7 @@
+         newVal = None
+ 
+         if type( node ) is dict:
+-            for k, n in node.iteritems():
++            for k, n in node.items():
+                 if 'base.HASH' == k or str( k ).endswith( '_HASH' ):
+                     node[ k ] = n.encode( 'hex' )
+                 elif str( k ).endswith( '_ATOM' ) and type( n ) is str:
+@@ -764,8 +764,8 @@
+     def __iter__( self ):
+         return self._ids.__iter__()
+ 
+-    def next( self ):
+-        return self._ids.next()
++    def __next__( self ):
++        return next(self._ids)
+ 
+     def children( self ):
+         def thisGen():
+diff -x .git -Naur a/beach/hcp/utils/hcp_databases.py b/beach/hcp/utils/hcp_databases.py
+--- a/beach/hcp/utils/hcp_databases.py	2017-09-18 08:59:05.136820000 -0400
++++ b/beach/hcp/utils/hcp_databases.py	2017-09-17 11:34:47.936977000 -0400
+@@ -85,7 +85,7 @@
+                         nRetry += 1
+             return res
+ 
+-        if type( query ) is str or type( query ) is unicode:
++        if type( query ) is str or type( query ) is str:
+             q = SimpleStatement( query, consistency_level = self.consistency )
+         else:
+             q = query
+@@ -94,7 +94,7 @@
+             res = queryWith( q )
+         except:
+             if self.backoffConsistency:
+-                if ( type( query ) is str or type( query ) is unicode ):
++                if ( type( query ) is str or type( query ) is str ):
+                     q = SimpleStatement( query, consistency_level = self.CL_Ingest )
+                 else:
+                     q = query
+@@ -117,7 +117,7 @@
+         return self.cur.prepare( query )
+ 
+     def execute_async( self, query, params = [] ):
+-        if type( query ) is str or type( query ) is unicode:
++        if type( query ) is str or type( query ) is str:
+             query = SimpleStatement( query, consistency_level = self.consistency )
+         realParams = []
+         for p in params:
+diff -x .git -Naur a/beach/hcp/utils/hcp_helpers.py b/beach/hcp/utils/hcp_helpers.py
+--- a/beach/hcp/utils/hcp_helpers.py	2017-09-18 08:59:05.136820000 -0400
++++ b/beach/hcp/utils/hcp_helpers.py	2017-09-17 11:34:48.193643000 -0400
+@@ -27,7 +27,7 @@
+     from beach.actor import Actor
+     rSequence = Actor.importLib( './rpcm', 'rSequence' )
+ except:
+-    from rpcm import rSequence
++    from .rpcm import rSequence
+ 
+ try:
+     import gevent.lock
+@@ -68,7 +68,7 @@
+     result = []
+     oType = type( o )
+ 
+-    if type( path ) is str or type( path ) is unicode:
++    if type( path ) is str or type( path ) is str:
+         tokens = [ x for x in path.split( '/' ) if x != '' ]
+     else:
+         tokens = path
+@@ -87,11 +87,11 @@
+             elif '?' == curToken:
+                 if 1 < len( tokens ):
+                     result = []
+-                    for elem in o.itervalues():
++                    for elem in o.values():
+                         if _isDynamicType( elem ):
+                             result += _xm_( elem, tokens[ 1 : ], False )
+ 
+-            elif o.has_key( curToken ):
++            elif curToken in o:
+                 if isEndPoint:
+                     result = [ o[ curToken ] ] if not _isListType( o[ curToken ] ) else o[ curToken ]
+                 elif _isDynamicType( o[ curToken ] ):
+@@ -99,7 +99,7 @@
+ 
+             if isWildcardDepth:
+                 tmpTokens = tokens[ : ]
+-                for elem in o.itervalues():
++                for elem in o.values():
+                     if _isDynamicType( elem ):
+                         result += _xm_( elem, tmpTokens, True )
+     elif issubclass( oType, list ) or oType is tuple:
+@@ -139,7 +139,7 @@
+ 
+ def hexDump( src, length = 8 ):
+     result = []
+-    for i in xrange( 0, len( src ), length ):
++    for i in range( 0, len( src ), length ):
+        s = src[ i : i + length ]
+        hexa = ' '.join( [ "%02X" % ord( x ) for x in s ] )
+        printable = s.translate( ''.join( [ ( len( repr( chr( x ) ) ) == 3 ) and chr( x ) or '.' for x in range( 256 ) ] ) )
+@@ -365,8 +365,8 @@
+             print( "some stuff" )
+     '''
+     if os.path.exists(lock_file):
+-        print 'Only one script can run at once. '\
+-              'Script is locked with %s' % lock_file
++        print('Only one script can run at once. '\
++              'Script is locked with %s' % lock_file)
+         sys.exit(-1)
+     else:
+         open(lock_file, 'w').write("1")
+@@ -381,7 +381,7 @@
+     def wrapped( *args, **kwargs ):
+         start = time.time()
+         r = f( *args, **kwargs )
+-        print( "%s: %s" % ( f.__name__, time.time() - start ) )
++        print(( "%s: %s" % ( f.__name__, time.time() - start ) ))
+         return r
+     return wrapped
+ 
+@@ -501,7 +501,7 @@
+             if self.platform is not None:
+                 self.platform = int( self.platform )
+                 
+-        elif type( seq ) is str or type( seq ) is unicode or type( seq ) is uuid.UUID:
++        elif type( seq ) is str or type( seq ) is str or type( seq ) is uuid.UUID:
+             seq = str( seq )
+             matches = self.re_agent_id.match( seq )
+             if matches is not None:
+diff -x .git -Naur a/beach/hcp/utils/rpcm.py b/beach/hcp/utils/rpcm.py
+--- a/beach/hcp/utils/rpcm.py	2017-09-18 08:59:05.136820000 -0400
++++ b/beach/hcp/utils/rpcm.py	2017-09-17 11:34:48.453643000 -0400
+@@ -51,7 +51,7 @@
+         return self
+     
+     def addStringW( self, tag, value ):
+-        self[ tag ] = { 'tag' : tag, 'value' : unicode( value ), 'type' : rpcm.RPCM_STRINGW }
++        self[ tag ] = { 'tag' : tag, 'value' : str( value ), 'type' : rpcm.RPCM_STRINGW }
+         return self
+     
+     def addBuffer( self, tag, value ):
+@@ -117,7 +117,7 @@
+         return self
+     
+     def addStringW( self, tag, value ):
+-        self.append( { 'tag' : tag, 'value' : unicode( value ), 'type' : rpcm.RPCM_STRINGW } )
++        self.append( { 'tag' : tag, 'value' : str( value ), 'type' : rpcm.RPCM_STRINGW } )
+         return self
+     
+     def addBuffer( self, tag, value ):
+@@ -377,7 +377,7 @@
+         elif type( j ) is dict:
+             res = rSequence()
+             
+-            for tag, val in j.iteritems():
++            for tag, val in j.items():
+                 res[ tag ] = self._json_to_rpcm( val )
+         else:
+             self._printDebug( 'unexpected structure in json to rpcm: %s' % str( j ) )
+@@ -468,10 +468,10 @@
+                 if None != tmpElem:
+                     if isList:
+                         self._printTrace( 'adding new element in list' )
+-                        s.append( tmpElem.values()[ 0 ] )
++                        s.append( list(tmpElem.values())[ 0 ] )
+                     else:
+                         self._printTrace( 'adding new element to seq' )
+-                        s = rSequence( s.items() + tmpElem.items() )
++                        s = rSequence( list(s.items()) + list(tmpElem.items()) )
+                 else:
+                     s = None
+                     self._printTrace( 'no element could be parsed' )
+@@ -562,7 +562,7 @@
+             if isList:
+                 values = value
+             else:
+-                values = value.values()
++                values = list(value.values())
+                 
+             for elem in values:
+                 s += self._serialise_element( elem )
+@@ -635,7 +635,7 @@
+         self._symbols = symbolsDict
+ 
+     def loadJson( self, jStr ):
+-        if type( jStr ) is str or type( jStr ) is unicode:
++        if type( jStr ) is str or type( jStr ) is str:
+             j = json.loads( jStr )
+         else:
+             j = jStr
+diff -x .git -Naur a/beach/http_endpoint.py b/beach/http_endpoint.py
+--- a/beach/http_endpoint.py	2017-09-18 08:59:05.140153000 -0400
++++ b/beach/http_endpoint.py	2017-09-17 11:34:43.700310000 -0400
+@@ -13,7 +13,7 @@
+ # limitations under the License.
+ 
+ from gevent import wsgi
+-import urlparse
++import urllib.parse
+ 
+ import os
+ import sys
+@@ -32,7 +32,7 @@
+     try:
+         params = [ x for x in environment[ 'wsgi.input' ].read() ]
+ 
+-        params = urlparse.parse_qs( ''.join( params ).lstrip( '&' ), strict_parsing = True )
++        params = urllib.parse.parse_qs( ''.join( params ).lstrip( '&' ), strict_parsing = True )
+     except:
+         params = {}
+ 
+diff -x .git -Naur a/infrastructure/start_cloud_in_a_can.py b/infrastructure/start_cloud_in_a_can.py
+--- a/infrastructure/start_cloud_in_a_can.py	2017-09-18 08:59:05.140153000 -0400
++++ b/infrastructure/start_cloud_in_a_can.py	2017-09-17 11:34:48.506977000 -0400
+@@ -44,11 +44,11 @@
+ 
+ if arguments.beach is not None:
+     beachCluster = os.path.abspath( arguments.beach )
+-    print( 'Using Beach cluster config: %s' % beachCluster )
++    print(( 'Using Beach cluster config: %s' % beachCluster ))
+ 
+ if arguments.patrol is not None:
+     patrolFile = arguments.patrol
+-    print( 'Using patrol file: %s' % patrolFile )
++    print(( 'Using patrol file: %s' % patrolFile ))
+ 
+ def printStep( step, *ret ):
+     msg = '''
+diff -x .git -Naur a/limacharlie/app.py b/limacharlie/app.py
+--- a/limacharlie/app.py	2017-09-18 08:59:05.140153000 -0400
++++ b/limacharlie/app.py	2017-09-17 11:34:49.083643000 -0400
+@@ -30,7 +30,7 @@
+ import json
+ import re
+ import time
+-import urllib
++import urllib.request, urllib.parse, urllib.error
+ from hcp_helpers import AgentId
+ from hcp_helpers import _x_
+ from hcp_helpers import _xm_
+@@ -122,7 +122,7 @@
+ 
+ def sanitizeJson( o, summarized = False ):
+     if type( o ) is dict:
+-        for k, v in o.iteritems():
++        for k, v in o.items():
+             o[ k ] = sanitizeJson( v, summarized = summarized )
+     elif type( o ) is list or type( o ) is tuple:
+         o = [ sanitizeJson( x, summarized = summarized ) for x in o ]
+@@ -130,7 +130,7 @@
+         o = str( o )
+     else:
+         try:
+-            if ( type(o) is str or type(o) is unicode ) and "\x00" in o: raise Exception()
++            if ( type(o) is str or type(o) is str ) and "\x00" in o: raise Exception()
+             json.dumps( o )
+         except:
+             o = base64.b64encode( o )
+@@ -230,7 +230,7 @@
+ #   HELPERS
+ #==============================================================================
+ def redirectTo( page, **kwargs ):
+-    dest = '/%s?%s' % ( page, urllib.urlencode( kwargs ) )
++    dest = '/%s?%s' % ( page, urllib.parse.urlencode( kwargs ) )
+     raise web.seeother( dest )
+ 
+ def reportError( f ):
+@@ -316,7 +316,7 @@
+ def refreshOrgMembership():
+     info = identmanager.request( 'get_user_membership', { 'uid' : session.uid } )
+     if info.isSuccess:
+-        session.orgs = map( uuid.UUID, info.data[ 'orgs' ] )
++        session.orgs = list(map( uuid.UUID, info.data[ 'orgs' ] ))
+ 
+ def isOrgAllowed( oid ):
+     if type( oid ) is not uuid.UUID:
+@@ -356,7 +356,7 @@
+     else:
+         res = model.request( 'list_sensors', {} )
+         if res.isSuccess:
+-            for sid, sensor in res.data.iteritems():
++            for sid, sensor in res.data.items():
+                 info.setdefault( AgentId( sensor[ 'aid' ] ).org_id, {} )[ sid ] = sensor
+     return info
+ 
+@@ -402,7 +402,7 @@
+         if info.data[ 'is_authenticated' ] is True:
+             session.is_logged_in = True
+             session.uid = uuid.UUID( info.data[ 'uid' ] )
+-            session.orgs = map( uuid.UUID, info.data[ 'orgs' ] )
++            session.orgs = list(map( uuid.UUID, info.data[ 'orgs' ] ))
+             session.email = info.data[ 'email' ]
+             session.must_change_password = info.data[ 'must_change_password' ]
+             session._tmp_otp = info.data.get( 'otp', None )
+@@ -508,8 +508,8 @@
+             allLiveDir = {}
+         if session.is_admin:
+             mergedSensors = {}
+-            for oid, sensors in getAllSensors( isAllOrgs = True ).iteritems():
+-                for sid, sensor in sensors.iteritems():
++            for oid, sensors in getAllSensors( isAllOrgs = True ).items():
++                for sid, sensor in sensors.items():
+                     sensor[ 'realtime' ] = True if str( AgentId( sensor[ 'aid' ] ).sensor_id ) in allLiveDir else False
+                     mergedSensors[ sid ] = sensor
+                 if oid not in session.orgs:
+@@ -520,8 +520,8 @@
+         info = deployment.request( 'get_global_config' )
+         if info.isSuccess:
+             welcomeMessage = info.data[ 'global/whatsnew' ]
+-        for oid, sensors in orgSensors.iteritems():
+-            for sid, sensor in sensors.iteritems():
++        for oid, sensors in orgSensors.items():
++            for sid, sensor in sensors.items():
+                 sensor[ 'realtime' ] = True if str( AgentId( sensor[ 'aid' ] ).sensor_id ) in allLiveDir else False
+             cards.insert( 1, card_sensor_stats( orgNames[ str( oid ) ], sensors ) )
+         return render.dashboard( cards, welcomeMessage )
+@@ -567,7 +567,7 @@
+             redirectTo( 'profile' )
+ 
+         if not session.is_admin:
+-            if any( map( lambda x: not self.isOrgAllowed( x ), params.orgs ) ):
++            if any( [not self.isOrgAllowed( x ) for x in params.orgs] ):
+                 session.notice = 'Permission denied on %s' % oid
+                 redirectTo( 'profile' )
+ 
+@@ -746,7 +746,7 @@
+         cards = []
+         orgNames = getOrgNames()
+         orgSensors = getAllSensors()
+-        for oid, sensors in orgSensors.iteritems():
++        for oid, sensors in orgSensors.items():
+             cards.append( card_sensors( orgNames[ str( oid ) ], sensors ) )
+         return render.sensors( cards )
+ 
+@@ -896,7 +896,7 @@
+             info.data[ 'events' ] = []
+             for event in originalEvents:
+                 if event[ 3 ] is None: continue
+-                thisAtom = event[ 3 ].values()[ 0 ].get( 'hbs.THIS_ATOM', None )
++                thisAtom = list(event[ 3 ].values())[ 0 ].get( 'hbs.THIS_ATOM', None )
+                 richEvent = None
+                 if hasattr( eventRender, event[ 1 ] ):
+                     try:
+@@ -955,10 +955,10 @@
+         # Make sure the root is present
+         isFound = False
+         for _, atom in info.data:
+-            if effectiveId == normalAtom( atom.values()[0]['hbs.THIS_ATOM'] ):
++            if effectiveId == normalAtom( list(atom.values())[0]['hbs.THIS_ATOM'] ):
+                 isFound = True
+                 break
+-        info.data = map( lambda x: { 'data' : x[ 1 ], 'key' : EventInterpreter( x[ 1 ] ).shortKey() }, info.data )
++        info.data = [{ 'data' : x[ 1 ], 'key' : EventInterpreter( x[ 1 ] ).shortKey() } for x in info.data]
+         if not isFound:
+             info.data.append( { 'data' : { 'UNKNOWN' : { 'hbs.THIS_ATOM' : effectiveId } },
+                                 'key' : 'UNKNOWN' } )
+@@ -986,7 +986,7 @@
+         if not isOrgAllowed( AgentId( routing[ 'aid' ] ).org_id ):
+             return renderAlone.error( 'Unauthorized.' )
+ 
+-        thisAtom = event.values()[ 0 ].get( 'hbs.THIS_ATOM', None )
++        thisAtom = list(event.values())[ 0 ].get( 'hbs.THIS_ATOM', None )
+ 
+         cards = []
+         cards.append( card_event( ( eid, sanitizeJson( event, summarized = params.summarized ) ), thisAtom ) )
+@@ -1438,8 +1438,8 @@
+             profiles[ oid ] = info.data
+ 
+         cards = []
+-        for oid, p in profiles.iteritems():
+-            for pName, pContent in p.iteritems():
++        for oid, p in profiles.items():
++            for pName, pContent in p.items():
+                 parsedProfile = {}
+                 if pContent is None: continue
+                 for conf in pContent:
+@@ -1463,8 +1463,8 @@
+             return renderAlone.error( 'Missing platform.' )
+ 
+         onOrOff = {}
+-        for colId in HbsCollectorId.lookup.iterkeys():
+-            if colId not in map( int, params.col ):
++        for colId in HbsCollectorId.lookup.keys():
++            if colId not in list(map( int, params.col )):
+                 onOrOff[ colId ] = False
+             else:
+                 onOrOff[ colId ] = True
+@@ -1495,7 +1495,7 @@
+     members = []
+     res = identmanager.request( 'get_org_members', { 'oid' : oid } )
+     if res.isSuccess:
+-        for uid, email in res.data[ 'orgs' ][ oid ].iteritems():
++        for uid, email in res.data[ 'orgs' ][ oid ].items():
+             members.append( ( email, uid ) )
+     return renderAlone.card_org_membership( name, members )
+ 
+diff -x .git -Naur a/standalone/endpoint_proxy.py b/standalone/endpoint_proxy.py
+--- a/standalone/endpoint_proxy.py	2017-09-18 08:59:05.143486000 -0400
++++ b/standalone/endpoint_proxy.py	2017-09-17 11:34:49.133643000 -0400
+@@ -24,7 +24,7 @@
+         global currentEndpoints
+         if 0 == len( currentEndpoints ): return
+ 
+-        print( "Connection from %s" % str( address ) )
++        print(( "Connection from %s" % str( address ) ))
+ 
+         try:
+         	source.setsockopt( socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1 )
+@@ -89,7 +89,7 @@
+     if 0 == len( currentEndpoints ):
+         tmpUpdate = 5
+ 
+-    print( "Updated list of endpoints, found %s" % len( currentEndpoints ) )
++    print(( "Updated list of endpoints, found %s" % len( currentEndpoints ) ))
+     gevent.spawn_later( tmpUpdate, updateEndpoints, endpointActors, nextUpdate )
+ 
+ if __name__ == '__main__':

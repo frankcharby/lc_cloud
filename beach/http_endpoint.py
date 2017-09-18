@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from gevent import wsgi
-import urlparse
+import urllib.parse
 
 import os
 import sys
@@ -32,7 +32,7 @@ def handle_beacon( environment, start_response ):
     try:
         params = [ x for x in environment[ 'wsgi.input' ].read() ]
 
-        params = urlparse.parse_qs( ''.join( params ).lstrip( '&' ), strict_parsing = True )
+        params = urllib.parse.parse_qs( ''.join( params ).lstrip( '&' ), strict_parsing = True )
     except:
         params = {}
 

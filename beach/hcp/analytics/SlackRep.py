@@ -43,7 +43,7 @@ class _TaskResp ( object ):
         self._event = Event()
     
     def _add( self, newData ):
-        if 'hbs.CLOUD_NOTIFICATION' == newData.keys()[ 0 ]:
+        if 'hbs.CLOUD_NOTIFICATION' == list(newData.keys())[ 0 ]:
             self.wasReceived = True
         else:
             self.responses.append( newData )
@@ -168,14 +168,14 @@ class RepInstance( object ):
 
             while not stopEvent.wait( 1.0 ):
                 for slackMessage in self.tryToRead():
-                    message = unicode( slackMessage.get( 'text' ) )
+                    message = str( slackMessage.get( 'text' ) )
                     fromUser = slackMessage.get( 'user' )
                     channel = slackMessage.get( 'channel' )
                     if not message or not fromUser or ( '<@%s>' % self.botId ) not in message:
                         continue
                     # Fixing silly quotes form unicode to ascii
-                    message = message.replace( u'\u201c', '"' )
-                    message = message.replace( u'\u201d', '"' )
+                    message = message.replace( '\u201c', '"' )
+                    message = message.replace( '\u201d', '"' )
                     try:
                         ctx = CommandContext( channel, 
                                               fromUser, 
@@ -273,7 +273,7 @@ class RepInstance( object ):
             data = self.getModelData( 'get_obj_list', { 'orgs' : self.oid, 'name' : ctx.cmd[ 1 ] } )
             if data is not None:
                 self.bot.rtm_send_message( ctx.channel, "here are the objects matching:\n%s\n(valid object types: %s)" % 
-                                                        ( self.prettyJson( [ x for x in data[ 'objects' ] if 'RELATION' != x[ 2 ] ] ), str( ObjectTypes.forward.keys() ) ) )
+                                                        ( self.prettyJson( [ x for x in data[ 'objects' ] if 'RELATION' != x[ 2 ] ] ), str( list(ObjectTypes.forward.keys()) ) ) )
         elif 4 <= len( ctx.cmd ):
             # Query for a characteristic of the object
             if '.' == ctx.cmd[ 3 ]:
@@ -342,7 +342,7 @@ class RepInstance( object ):
         osxOnline = 0
         linOnline = 0
         onlineSensors = []
-        for sid, sensorInfo in orgSensors.iteritems():
+        for sid, sensorInfo in orgSensors.items():
             aid = AgentId( sensorInfo[ 'aid' ] )
             isOnline = False
             if sid in sensorDir:
@@ -525,7 +525,7 @@ class RepInstance( object ):
 
     def sanitizeJson( self, o ):
         if type( o ) is dict:
-            for k, v in o.iteritems():
+            for k, v in o.items():
                 o[ k ] = self.sanitizeJson( v )
         elif type( o ) is list or type( o ) is tuple:
             o = [ self.sanitizeJson( x ) for x in o ]
@@ -533,7 +533,7 @@ class RepInstance( object ):
             o = str( o )
         else:
             try:
-                if ( type(o) is str or type(o) is unicode ) and "\x00" in o: raise Exception()
+                if ( type(o) is str or type(o) is str ) and "\x00" in o: raise Exception()
                 json.dumps( o )
             except:
                 o = base64.b64encode( o )
@@ -610,7 +610,7 @@ class RepInstance( object ):
             return None
 
     def msTsToTime( self, ts ):
-        if type( ts ) in ( str, unicode ):
+        if type( ts ) in ( str, str ):
             ts = ts.split( '.' )[ 0 ]
         return datetime.datetime.fromtimestamp( float( ts ) / 1000 ).strftime( '%Y-%m-%d %H:%M:%S.%f' )
 

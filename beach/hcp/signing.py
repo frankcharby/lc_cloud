@@ -76,13 +76,13 @@ if __name__ == '__main__':
     try:
         s = Signing( arguments.private_key.read() )
     except:
-        print( "Error loading key: %s" % traceback.format_exc() )
+        print(( "Error loading key: %s" % traceback.format_exc() ))
         sys.exit()
     
     try:
         sig = s.sign( arguments.file.read() )
     except:
-        print( "Error signing file: %s" % traceback.format_exc() )
+        print(( "Error signing file: %s" % traceback.format_exc() ))
         sys.exit()
     
     try:
@@ -90,7 +90,7 @@ if __name__ == '__main__':
         f.write( sig )
         f.close()
     except:
-        print( "Error writing signature to output file: %s" % traceback.format_exc() )
+        print(( "Error writing signature to output file: %s" % traceback.format_exc() ))
         sys.exit()
     
-    print( "Signing file %s with key %s to file %s." % ( arguments.file.name, arguments.private_key.name, output_file ) )
+    print(( "Signing file %s with key %s to file %s." % ( arguments.file.name, arguments.private_key.name, output_file ) ))

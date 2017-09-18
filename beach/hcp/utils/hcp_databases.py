@@ -85,7 +85,7 @@ class CassDb( object ):
                         nRetry += 1
             return res
 
-        if type( query ) is str or type( query ) is unicode:
+        if type( query ) is str or type( query ) is str:
             q = SimpleStatement( query, consistency_level = self.consistency )
         else:
             q = query
@@ -94,7 +94,7 @@ class CassDb( object ):
             res = queryWith( q )
         except:
             if self.backoffConsistency:
-                if ( type( query ) is str or type( query ) is unicode ):
+                if ( type( query ) is str or type( query ) is str ):
                     q = SimpleStatement( query, consistency_level = self.CL_Ingest )
                 else:
                     q = query
@@ -117,7 +117,7 @@ class CassDb( object ):
         return self.cur.prepare( query )
 
     def execute_async( self, query, params = [] ):
-        if type( query ) is str or type( query ) is unicode:
+        if type( query ) is str or type( query ) is str:
             query = SimpleStatement( query, consistency_level = self.consistency )
         realParams = []
         for p in params:

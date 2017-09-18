@@ -65,7 +65,7 @@ class StatsComputer( Actor ):
         platforms = {}
 
         # Count the number of hosts per platform
-        agents = [ AgentId( x ) for x in self.be.hcp_getAgentStates().data[ 'agents' ].keys() ]
+        agents = [ AgentId( x ) for x in list(self.be.hcp_getAgentStates().data[ 'agents' ].keys()) ]
         for agent in agents:
             platforms.setdefault( agent.platform, 0 )
             platforms[ agent.platform ] += 1
@@ -76,9 +76,9 @@ class StatsComputer( Actor ):
 
         # Remove all process objects that were not on X% of hosts of that platform
         highCertaintyObjects = {}
-        for platform, locs in locs.iteritems():
+        for platform, locs in locs.items():
             curPlatform = platforms[ platform ]
-            for oid, n in locs.iteritems():
+            for oid, n in locs.items():
                 # If the object is in at least X% of hosts of that platform consider it
                 if( ( absoluteParentCoverage is None or n  >= absoluteParentCoverage ) and 
                     ( float( n ) / curPlatform ) >= parentCoverage ):
@@ -87,8 +87,8 @@ class StatsComputer( Actor ):
         del platforms
 
         # For each of those ubiquitious processes, find all the relationships (parent and child)
-        for platform, objects in highCertaintyObjects.iteritems():
-            for oid in objects.iterkeys():
+        for platform, objects in highCertaintyObjects.items():
+            for oid in objects.keys():
                 # If we are reversed (meaning we center the stats around the child) we flip it around
                 def _genRelations():
                     if isReversed:
@@ -101,7 +101,7 @@ class StatsComputer( Actor ):
                 nRel = 0
                 for rel in _genRelations():
                     relStats = self._tallyLocStats( HostObjects( rel ).locs(), withPlatform = False )
-                    for rid, count in relStats.iteritems():
+                    for rid, count in relStats.items():
                         if parentCoverage < ( float( count ) / highCertaintyObjects[ platform ][ oid ] ):
                             highCertaintyRelations[ rid ] = count
                         else:
@@ -109,5 +109,5 @@ class StatsComputer( Actor ):
                         nRel += 1
                     if ( nFPs <= maxFalsePositives and 
                        ( float( len( highCertaintyRelations ) ) / nRel ) >= parentCoverage ):
-                        whitelisted[ oid ] = highCertaintyRelations.keys()
+                        whitelisted[ oid ] = list(highCertaintyRelations.keys())
         self.lastStats[ ( parentType, childType, isReversed ) ] = whitelisted

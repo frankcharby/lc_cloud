@@ -45,7 +45,7 @@ class AuditManager( Actor ):
     def asUuidList( self, elem ):
         if type( elem ) not in ( list, tuple ):
             elem = [ elem ]
-        return map( uuid.UUID, elem )
+        return list(map( uuid.UUID, elem ))
 
     def record( self, msg ):
         req = msg.data

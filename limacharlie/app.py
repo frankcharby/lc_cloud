@@ -30,7 +30,7 @@ import datetime
 import json
 import re
 import time
-import urllib
+import urllib.request, urllib.parse, urllib.error
 from hcp_helpers import AgentId
 from hcp_helpers import _x_
 from hcp_helpers import _xm_
@@ -122,7 +122,7 @@ class _renderWrapper( object ):
 
 def sanitizeJson( o, summarized = False ):
     if type( o ) is dict:
-        for k, v in o.iteritems():
+        for k, v in o.items():
             o[ k ] = sanitizeJson( v, summarized = summarized )
     elif type( o ) is list or type( o ) is tuple:
         o = [ sanitizeJson( x, summarized = summarized ) for x in o ]
@@ -130,7 +130,7 @@ def sanitizeJson( o, summarized = False ):
         o = str( o )
     else:
         try:
-            if ( type(o) is str or type(o) is unicode ) and "\x00" in o: raise Exception()
+            if ( type(o) is str or type(o) is str ) and "\x00" in o: raise Exception()
             json.dumps( o )
         except:
             o = base64.b64encode( o )
@@ -230,7 +230,7 @@ gevent.spawn( pollOutageState )
 #   HELPERS
 #==============================================================================
 def redirectTo( page, **kwargs ):
-    dest = '/%s?%s' % ( page, urllib.urlencode( kwargs ) )
+    dest = '/%s?%s' % ( page, urllib.parse.urlencode( kwargs ) )
     raise web.seeother( dest )
 
 def reportError( f ):
@@ -316,7 +316,7 @@ def wipeSession():
 def refreshOrgMembership():
     info = identmanager.request( 'get_user_membership', { 'uid' : session.uid } )
     if info.isSuccess:
-        session.orgs = map( uuid.UUID, info.data[ 'orgs' ] )
+        session.orgs = list(map( uuid.UUID, info.data[ 'orgs' ] ))
 
 def isOrgAllowed( oid ):
     if type( oid ) is not uuid.UUID:
@@ -356,7 +356,7 @@ def getAllSensors( isAllOrgs = False ):
     else:
         res = model.request( 'list_sensors', {} )
         if res.isSuccess:
-            for sid, sensor in res.data.iteritems():
+            for sid, sensor in res.data.items():
                 info.setdefault( AgentId( sensor[ 'aid' ] ).org_id, {} )[ sid ] = sensor
     return info
 
@@ -402,7 +402,7 @@ class Login:
         if info.data[ 'is_authenticated' ] is True:
             session.is_logged_in = True
             session.uid = uuid.UUID( info.data[ 'uid' ] )
-            session.orgs = map( uuid.UUID, info.data[ 'orgs' ] )
+            session.orgs = list(map( uuid.UUID, info.data[ 'orgs' ] ))
             session.email = info.data[ 'email' ]
             session.must_change_password = info.data[ 'must_change_password' ]
             session._tmp_otp = info.data.get( 'otp', None )
@@ -508,8 +508,8 @@ class Dashboard ( AuthenticatedPage ):
             allLiveDir = {}
         if session.is_admin:
             mergedSensors = {}
-            for oid, sensors in getAllSensors( isAllOrgs = True ).iteritems():
-                for sid, sensor in sensors.iteritems():
+            for oid, sensors in getAllSensors( isAllOrgs = True ).items():
+                for sid, sensor in sensors.items():
                     sensor[ 'realtime' ] = True if str( AgentId( sensor[ 'aid' ] ).sensor_id ) in allLiveDir else False
                     mergedSensors[ sid ] = sensor
                 if oid not in session.orgs:
@@ -520,8 +520,8 @@ class Dashboard ( AuthenticatedPage ):
         info = deployment.request( 'get_global_config' )
         if info.isSuccess:
             welcomeMessage = info.data[ 'global/whatsnew' ]
-        for oid, sensors in orgSensors.iteritems():
-            for sid, sensor in sensors.iteritems():
+        for oid, sensors in orgSensors.items():
+            for sid, sensor in sensors.items():
                 sensor[ 'realtime' ] = True if str( AgentId( sensor[ 'aid' ] ).sensor_id ) in allLiveDir else False
             cards.insert( 1, card_sensor_stats( orgNames[ str( oid ) ], sensors ) )
         return render.dashboard( cards, welcomeMessage )
@@ -567,7 +567,7 @@ class Profile ( AuthenticatedPage ):
             redirectTo( 'profile' )
 
         if not session.is_admin:
-            if any( map( lambda x: not self.isOrgAllowed( x ), params.orgs ) ):
+            if any( [not self.isOrgAllowed( x ) for x in params.orgs] ):
                 session.notice = 'Permission denied on %s' % oid
                 redirectTo( 'profile' )
 
@@ -746,7 +746,7 @@ class Sensors ( AuthenticatedPage ):
         cards = []
         orgNames = getOrgNames()
         orgSensors = getAllSensors()
-        for oid, sensors in orgSensors.iteritems():
+        for oid, sensors in orgSensors.items():
             cards.append( card_sensors( orgNames[ str( oid ) ], sensors ) )
         return render.sensors( cards )
 
@@ -896,7 +896,7 @@ class Traffic ( AuthenticatedPage ):
             info.data[ 'events' ] = []
             for event in originalEvents:
                 if event[ 3 ] is None: continue
-                thisAtom = event[ 3 ].values()[ 0 ].get( 'hbs.THIS_ATOM', None )
+                thisAtom = list(event[ 3 ].values())[ 0 ].get( 'hbs.THIS_ATOM', None )
                 richEvent = None
                 if hasattr( eventRender, event[ 1 ] ):
                     try:
@@ -955,10 +955,10 @@ class ExplorerData ( AuthenticatedPage ):
         # Make sure the root is present
         isFound = False
         for _, atom in info.data:
-            if effectiveId == normalAtom( atom.values()[0]['hbs.THIS_ATOM'] ):
+            if effectiveId == normalAtom( list(atom.values())[0]['hbs.THIS_ATOM'] ):
                 isFound = True
                 break
-        info.data = map( lambda x: { 'data' : x[ 1 ], 'key' : EventInterpreter( x[ 1 ] ).shortKey() }, info.data )
+        info.data = [{ 'data' : x[ 1 ], 'key' : EventInterpreter( x[ 1 ] ).shortKey() } for x in info.data]
         if not isFound:
             info.data.append( { 'data' : { 'UNKNOWN' : { 'hbs.THIS_ATOM' : effectiveId } },
                                 'key' : 'UNKNOWN' } )
@@ -986,7 +986,7 @@ class EventView ( AuthenticatedPage ):
         if not isOrgAllowed( AgentId( routing[ 'aid' ] ).org_id ):
             return renderAlone.error( 'Unauthorized.' )
 
-        thisAtom = event.values()[ 0 ].get( 'hbs.THIS_ATOM', None )
+        thisAtom = list(event.values())[ 0 ].get( 'hbs.THIS_ATOM', None )
 
         cards = []
         cards.append( card_event( ( eid, sanitizeJson( event, summarized = params.summarized ) ), thisAtom ) )
@@ -1438,8 +1438,8 @@ class SensorConfigs ( AuthenticatedPage ):
             profiles[ oid ] = info.data
 
         cards = []
-        for oid, p in profiles.iteritems():
-            for pName, pContent in p.iteritems():
+        for oid, p in profiles.items():
+            for pName, pContent in p.items():
                 parsedProfile = {}
                 if pContent is None: continue
                 for conf in pContent:
@@ -1463,8 +1463,8 @@ class SensorConfigs ( AuthenticatedPage ):
             return renderAlone.error( 'Missing platform.' )
 
         onOrOff = {}
-        for colId in HbsCollectorId.lookup.iterkeys():
-            if colId not in map( int, params.col ):
+        for colId in HbsCollectorId.lookup.keys():
+            if colId not in list(map( int, params.col )):
                 onOrOff[ colId ] = False
             else:
                 onOrOff[ colId ] = True
@@ -1495,7 +1495,7 @@ def card_org_membership( name, oid ):
     members = []
     res = identmanager.request( 'get_org_members', { 'oid' : oid } )
     if res.isSuccess:
-        for uid, email in res.data[ 'orgs' ][ oid ].iteritems():
+        for uid, email in res.data[ 'orgs' ][ oid ].items():
             members.append( ( email, uid ) )
     return renderAlone.card_org_membership( name, members )
 

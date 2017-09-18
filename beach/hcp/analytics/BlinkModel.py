@@ -113,7 +113,7 @@ class BlinkModel( Actor ):
         if report is not None:
             report = json.loads( report[ 0 ] )
             hits = 0
-            for av, r in report.iteritems():
+            for av, r in report.items():
                 if r is not None:
                     hits += 1
             if hits > 2:

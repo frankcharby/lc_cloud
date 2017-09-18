@@ -44,7 +44,7 @@ class Hunt ( Actor ):
 
     def _regCulling( self ):
         curTime = int( time.time() )
-        for name in ( name for name, ts in self._regInvTtl.iteritems() if ts < ( curTime - self._ttl ) ):
+        for name in ( name for name, ts in self._regInvTtl.items() if ts < ( curTime - self._ttl ) ):
             self._unregisterToInvData( name )
 
     def _registerToDetect( self, detect ):

@@ -19,9 +19,9 @@ AgentId = Actor.importLib( 'utils/hcp_helpers', 'AgentId' )
 
 import os
 import traceback
-import StringIO
+import io
 import base64
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 import yara
 
 class YaraUpdater ( StatelessActor ):
@@ -40,7 +40,7 @@ class YaraUpdater ( StatelessActor ):
 
         if not os.path.exists( self.rulesDir ):
             for plat in ( 'common', 'windows', 'osx', 'linux' ):
-                os.makedirs( os.path.join( self.rulesDir, plat ), 0700 )
+                os.makedirs( os.path.join( self.rulesDir, plat ), 0o700 )
 
         self.schedule( self.dirRefreshFrequency, self.refreshDirRules )
         self.schedule( self.remoteRefreshFrequency, self.refreshRemoteRules )
@@ -90,10 +90,10 @@ class YaraUpdater ( StatelessActor ):
             self.log( 'new Yara rules detected, refreshing' )
 
     def refreshRemoteRules( self ):
-        for name, remote in self.remoteRules.iteritems():
+        for name, remote in self.remoteRules.items():
             try:
                 with open( os.path.join( self.rulesDir, name ), 'w' ) as f:
-                    f.write( urllib2.urlopen( remote ).read() )
+                    f.write( urllib.request.urlopen( remote ).read() )
                 self.log( 'refreshed remote rules: %s bytes' % os.path.getsize( os.path.join( self.rulesDir, name ) ) )
             except:
                 self.logCritical( 'failed to fetch remote rule %s %s' % ( remote, traceback.format_exc() ) )

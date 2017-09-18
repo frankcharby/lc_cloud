@@ -417,9 +417,9 @@ class EndpointProcessor( Actor ):
             # Transmit the message to the analytics cloud.
             routing = { 'aid' : c.getAid(),
                         'moduleid' : HcpModuleId.HBS,
-                        'event_type' : message.keys()[ 0 ],
+                        'event_type' : list(message.keys())[ 0 ],
                         'event_id' : uuid.uuid4() }
-            invId = message.values()[ 0 ].get( 'hbs.INVESTIGATION_ID', None )
+            invId = list(message.values())[ 0 ].get( 'hbs.INVESTIGATION_ID', None )
             if invId is not None:
                 routing[ 'investigation_id' ] = invId
             self.analyticsIntake.shoot( 'analyze', ( ( routing, message ), ), timeout = 600 )

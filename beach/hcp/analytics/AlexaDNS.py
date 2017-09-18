@@ -13,9 +13,9 @@
 # limitations under the License.
 
 from beach.actor import Actor
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 from zipfile import ZipFile
-from StringIO import StringIO
+from io import StringIO
 import tld
 import tld.utils
 
@@ -33,7 +33,7 @@ class AlexaDNS ( Actor ):
         pass
 
     def refreshDomains( self ):
-        response = urllib2.urlopen( urllib2.Request( self.domain, 
+        response = urllib.request.urlopen( urllib.request.Request( self.domain, 
                                                      headers = { 'User-Agent': 'LimaCharlie' } ) ).read()
         z = ZipFile( StringIO( response ) )
         content = z.read( z.namelist()[ 0 ] )

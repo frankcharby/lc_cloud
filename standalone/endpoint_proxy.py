@@ -24,7 +24,7 @@ class LcEndpointProxy ( StreamServer ):
         global currentEndpoints
         if 0 == len( currentEndpoints ): return
 
-        print( "Connection from %s" % str( address ) )
+        print(( "Connection from %s" % str( address ) ))
 
         try:
         	source.setsockopt( socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1 )
@@ -89,7 +89,7 @@ def updateEndpoints( endpointActors, nextUpdate ):
     if 0 == len( currentEndpoints ):
         tmpUpdate = 5
 
-    print( "Updated list of endpoints, found %s" % len( currentEndpoints ) )
+    print(( "Updated list of endpoints, found %s" % len( currentEndpoints ) ))
     gevent.spawn_later( tmpUpdate, updateEndpoints, endpointActors, nextUpdate )
 
 if __name__ == '__main__':

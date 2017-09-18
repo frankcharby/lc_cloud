@@ -117,7 +117,7 @@ class AnalyticsModeling( Actor ):
     def _ingestObjects( self, ttls, sid, ts, objects, relations, oid ):
         ts = datetime.datetime.fromtimestamp( ts )
 
-        for relType, relVals in relations.iteritems():
+        for relType, relVals in relations.items():
             for relVal in relVals:
                 objects.setdefault( ObjectTypes.RELATION, [] ).append( RelationName( relVal[ 0 ],
                                                                                      relType[ 0 ],
@@ -139,7 +139,7 @@ class AnalyticsModeling( Actor ):
                                                                          ObjectKey( relVal[ 0 ], relType[ 0 ] ),
                                                                          ttl ) ) )
 
-        for objType, objVals in objects.iteritems():
+        for objType, objVals in objects.items():
             for objVal in objVals:
                 k = ObjectKey( objVal, objType )
 
@@ -255,7 +255,7 @@ class AnalyticsModeling( Actor ):
         for ignored in self.ignored_objects:
             if ignored in new_objects:
                 del( new_objects[ ignored ] )
-            for k in new_relations.keys():
+            for k in list(new_relations.keys()):
                 if ignored in k:
                     del( new_relations[ k ] )
 

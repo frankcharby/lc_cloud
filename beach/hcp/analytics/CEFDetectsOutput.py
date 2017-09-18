@@ -48,13 +48,13 @@ class CEFDetectsOutput( Actor ):
         record = 'CEF:0|refractionPOINT|LimaCharlie|1|%s|%s|%s|' % ( category, summary, priority )
         extension = { 'rpLCFullDetails' : detect,
                       'rpLCLink' : 'http://%s/detect?id=%s' % ( self._lc_web, detect_id ),
-                      'rpLCHostnames' : ','.join( map( lambda x: Host( x ).getHostName(), source ) ) }
+                      'rpLCHostnames' : ','.join( [Host( x ).getHostName() for x in source] ) }
 
         # Try to parse out common datatypes
         # For now we'll only populate the details.
 
-        for k, v in extension.iteritems():
-            v = unicode( v )
+        for k, v in extension.items():
+            v = str( v )
             record += '%s=%s ' % ( k, v.replace( r'\\', r'\\\\' )
                                        .replace( r'=', r'\=' )
                                        .replace( '\r\n', r'\r\n' )

@@ -88,7 +88,7 @@ class EventInterpreter( object ):
 
 	def setEvent( self, event ):
 		self.event = event
-		self.eventType = event.keys()[ 0 ]
+		self.eventType = list(event.keys())[ 0 ]
 
 	def description( self ):
 		return _eventTypes.get( self.eventType, ( None, None, None, None ) )[ 0 ]

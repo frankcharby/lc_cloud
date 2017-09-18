@@ -44,11 +44,11 @@ patrolFile = os.path.join( root,
 
 if arguments.beach is not None:
     beachCluster = os.path.abspath( arguments.beach )
-    print( 'Using Beach cluster config: %s' % beachCluster )
+    print(( 'Using Beach cluster config: %s' % beachCluster ))
 
 if arguments.patrol is not None:
     patrolFile = arguments.patrol
-    print( 'Using patrol file: %s' % patrolFile )
+    print(( 'Using patrol file: %s' % patrolFile ))
 
 def printStep( step, *ret ):
     msg = '''

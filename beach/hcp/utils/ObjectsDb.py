@@ -47,7 +47,7 @@ def ObjectNormalForm( objName, objType, isCaseSensitive = False ):
             objName = objName.encode( 'hex' )
     else:
         try:
-            objName = unicode( objName )
+            objName = str( objName )
             if not isCaseSensitive or objType not in caseSensitiveTypes:
                 objName = objName.lower()
             objName = objName.encode( 'utf-8' )
@@ -234,7 +234,7 @@ class HostObjects( object ):
 
     @classmethod
     def matching( cls, ofType, withParents, withChildren ):
-        if type( ofType ) is str or type( ofType ) is unicode:
+        if type( ofType ) is str or type( ofType ) is str:
             ofType = ObjectTypes.forward[ ofType ]
 
         def thisGen():
@@ -269,7 +269,7 @@ class HostObjects( object ):
 
     @classmethod
     def _castType( cls, t ):
-        if type( t ) is str or type( t ) is unicode:
+        if type( t ) is str or type( t ) is str:
             return ObjectTypes.forward[ t ]
         else:
             return int( t )
@@ -290,8 +290,8 @@ class HostObjects( object ):
     def __iter__( self ):
         return self._ids.__iter__()
 
-    def next( self ):
-        return self._ids.next()
+    def __next__( self ):
+        return next(self._ids)
 
     def acl( self, oid = None ):
         if oid is None:
@@ -416,7 +416,7 @@ class Host( object ):
         col = []
         agents = cls._be.hcp_getAgentStates( aid = mask, hostname = hostname )
         if agents.isSuccess and 'agents' in agents.data:
-            col = [ Host( x ) for x in agents.data[ 'agents' ].keys() ]
+            col = [ Host( x ) for x in list(agents.data[ 'agents' ].keys()) ]
         return col
 
     @classmethod
@@ -479,7 +479,7 @@ class Host( object ):
 
         info = self._be.hcp_getAgentStates( aid = self.sid )
         if info.isSuccess and 'agents' in info.data and 0 != len( info.data[ 'agents' ] ):
-            info = info.data[ 'agents' ].values()[ 0 ]
+            info = list(info.data[ 'agents' ].values())[ 0 ]
             hostname = info[ 'last_hostname' ]
 
         return hostname
@@ -609,7 +609,7 @@ class FluxEvent( object ):
         newVal = None
 
         if type( node ) is dict:
-            for k, n in node.iteritems():
+            for k, n in node.items():
                 if 'base.HASH' == k or str( k ).endswith( '_HASH' ):
                     node[ k ] = n.encode( 'hex' )
                 elif str( k ).endswith( '_ATOM' ) and type( n ) is str:
@@ -764,8 +764,8 @@ class Atoms ( object ):
     def __iter__( self ):
         return self._ids.__iter__()
 
-    def next( self ):
-        return self._ids.next()
+    def __next__( self ):
+        return next(self._ids)
 
     def children( self ):
         def thisGen():

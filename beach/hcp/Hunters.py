@@ -34,7 +34,7 @@ class _TaskResp ( object ):
         self._event = Event()
     
     def _add( self, newData ):
-        if 'hbs.CLOUD_NOTIFICATION' == newData.keys()[ 0 ]:
+        if 'hbs.CLOUD_NOTIFICATION' == list(newData.keys())[ 0 ]:
             self.wasReceived = True
         else:
             self.responses.append( newData )
@@ -349,14 +349,14 @@ class Hunter ( Actor ):
         resp = self.VirusTotal.request( 'get_report', { 'hash' : fileHash, 'no_cache' : True } )
         if resp.isSuccess and resp.data[ 'report' ] is not None:
             report = resp.data[ 'report' ]
-            for av, res in report.items():
+            for av, res in list(report.items()):
                 if res is None:
                     del( report[ av ] )
 
         if report is not None and 0 < len( report ):
             mdReport = [ '| AV | Result |',
                          '| -- | ------ |' ]
-            for av, res in report.iteritems():
+            for av, res in report.items():
                 mdReport.append( '| %s | %s |' % ( av, res ) )
         
         return ( report, '\n'.join( mdReport ) )

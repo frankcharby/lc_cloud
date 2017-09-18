@@ -68,7 +68,7 @@ class PagingActor( Actor ):
             return ( False, )
 
     def sendPage( self, dest, subject, message ):
-        if type( dest ) is str or type( dest ) is unicode:
+        if type( dest ) is str or type( dest ) is str:
             dest = ( dest, )
         msg = MIMEMultipart( 'alternative' )
         dest = ', '.join( dest )
