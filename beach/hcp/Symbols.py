@@ -31,8 +31,8 @@ class Symbols( object ):
         try:
             tmpTags = Actor.readRelativeFile( 'rp_hcp_tags.json' )
         except:
-            tmpTags = open( os.path.join( os.path.abspath( os.path.dirname( __file__ ) ), 'rp_hcp_tags.json' ), 'r' ).read()
-        tmpTags = json.loads( tmpTags )
+            tmpTags = open( os.path.join( os.path.abspath( os.path.dirname( __file__ ) ), 'rp_hcp_tags.json' ), 'rb' ).read()
+        tmpTags = json.loads( tmpTags.decode('utf-8') )
         for group in tmpTags[ 'groups' ]:
             gName = group[ 'groupName' ]
             for definition in group[ 'definitions' ]:

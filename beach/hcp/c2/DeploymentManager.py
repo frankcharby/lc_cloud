@@ -14,7 +14,10 @@
 
 from beach.actor import Actor
 import traceback
+
 #import M2Crypto
+from Crypto.PublicKey import RSA
+
 import tempfile
 import os
 import hashlib
@@ -45,14 +48,14 @@ class Signing( object ):
         if not privateKey.startswith( '-----BEGIN RSA PRIVATE KEY-----' ):
             privateKey = self.der2pem( privateKey )
             
-        self.pri_key = M2Crypto.RSA.load_key_string( privateKey )
+        self.pri_key = RSA.importKey( privateKey )
     
     
     def sign( self, buff ):
         sig = None
         h = hashlib.sha256( buff ).digest()
         
-        sig = self.pri_key.private_encrypt( h, M2Crypto.RSA.pkcs1_padding )
+        sig = self.pri_key.encrypt( h, 'x' )[0]
         
         return sig
     
