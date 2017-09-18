@@ -64,29 +64,29 @@ Return Values: %s
         sys.exit(-1)
 
 printStep( 'Starting the Beach host manager to make this host a one node cluster (in a screen).',
-    os.system( 'screen -d -m python -m beach.hostmanager %s --log-level 10'% ( beachCluster, ) ) )
+    os.system( 'screen -d -m python3 -m beach.hostmanager %s --log-level 10'% ( beachCluster, ) ) )
 
 printStep( 'Starting the Beach dashboard on port 8080 (in a screen).',
-    os.system( 'screen -d -m python -m beach.dashboard 8080 %s'% ( beachCluster, ) ) )
+    os.system( 'screen -d -m python3 -m beach.dashboard 8080 %s'% ( beachCluster, ) ) )
 
 time.sleep( 2 )
 
 printStep( 'Starting all actor in a Beach Patrol (in a screen).',
-    os.system( 'screen -d -m python -m beach.patrol %s %s --realm hcp --set-scale 10' % 
+    os.system( 'screen -d -m python3 -m beach.patrol %s %s --realm hcp --set-scale 10' % 
         ( beachCluster,
           patrolFile ) ) )
 
 printStep( 'Starting the LIMA CHARLIE web interface on port 8888 (in a screen).',
-    os.system( 'screen -d -m python %s 8888'% ( os.path.join( root,
+    os.system( 'screen -d -m python3 %s 8888'% ( os.path.join( root,
                                                               'cloud',
                                                               'limacharlie',
                                                               'app.py' ) ) ) )
 
 printStep( 'Starting the BEACH REST interface on port 8889 (in a screen).',
-    os.system( 'screen -d -m python -m beach.restbridge 8889 %s hcp'% ( beachCluster, ) ) )
+    os.system( 'screen -d -m python3 -m beach.restbridge 8889 %s hcp'% ( beachCluster, ) ) )
 
 printStep( 'Starting the LC Endpoint Proxy interface on port 9090 (in a screen).',
-    os.system( 'screen -d -m python %s -c %s -l 0.0.0.0:9090'% ( os.path.join( root,
+    os.system( 'screen -d -m python3 %s -c %s -l 0.0.0.0:9090'% ( os.path.join( root,
                                                                                'cloud',
                                                                                'standalone',
                                                                                'endpoint_proxy.py' ),

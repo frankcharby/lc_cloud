@@ -52,10 +52,10 @@ printStep( 'Updating repo and upgrading existing components.',
     os.system( 'apt-get upgrade -y' ) )
 
 printStep( 'Installing some basic packages required for Beach (mainly).',
-    os.system( 'apt-get install openssl python-pip python-dev debconf-utils python-m2crypto python-pexpect autoconf libtool git flex byacc bison unzip -y' ) )
+    os.system( 'apt-get install openssl python3-pip python3-dev debconf-utils python3-pexpect autoconf libtool git flex byacc bison unzip -y' ) )
 
 print( 'Download prefixtree (expected to fail).' )
-os.system( 'pip download prefixtree' )
+os.system( 'pip3 download prefixtree' )
 
 printStep( 'Installing prefixtree.',
     os.system( 'pip install --upgrade pip' ),
@@ -64,11 +64,12 @@ printStep( 'Installing prefixtree.',
     os.system( 'rm *prefixtree*.tar.gz' ),
     os.system( 'sed -i \'s/from distribute_setup import use_setuptools//g\' *prefixtree*/setup.py' ),
     os.system( 'sed -i \'s/use_setuptools()//g\' *prefixtree*/setup.py' ),
-    os.system( 'cd *prefixtree*; python ./setup.py install; cd ..' ) )
+    os.system( 'cd *prefixtree*; python3 ./setup.py install; cd ..' ) )
 
 printStep( 'Installing Beach.',
-    os.system( 'pip install distribute' ),
-    os.system( 'pip install beach' ) )
+    os.system( 'pip3 install distribute' ),
+    os.system( 'git clone https://github.com/frankcharby/py-beach.git; cd py-beach; python3 setup.py install' ) )
+    #os.system( 'pip3 install beach' ) )
 
 printStep( 'Installing JRE for Cassandra (the hcp-scale-db)',
     os.system( 'apt-get install default-jre-headless -y' ) )
@@ -89,9 +90,9 @@ printStep( 'Initializing Cassandra schema.',
                                                'scale_db.cql' ), ) ) )
 
 printStep( 'Installing pip packages for various analytics components.',
-    os.system( 'pip install time_uuid cassandra-driver virustotal' ),
-    os.system( 'pip install ipaddress tld pyqrcode pypng' ),
-    os.system( 'pip install slacker slackclient python-dateutil' ) )
+    os.system( 'pip3 install time_uuid cassandra-driver virustotal' ),
+    os.system( 'pip3 install ipaddress tld pyqrcode pypng' ),
+    os.system( 'pip3 install slacker slackclient python-dateutil' ) )
 
 printStep( 'Installing Yara.',
     os.system( 'git clone https://github.com/refractionPOINT/yara.git' ),
@@ -113,7 +114,7 @@ printStep( 'Setting up host file entries for databases locally.',
     os.system( 'echo "127.0.0.1 hcp-scale-db" >> /etc/hosts' ) )
 
 printStep( 'Setting up the cloud tags.',
-    os.system( 'python %s' % ( os.path.join( root,
+    os.system( 'python3 %s' % ( os.path.join( root,
                                              'tools',
                                              'update_headers.py' ), ) ) )
 
@@ -127,7 +128,7 @@ printStep( 'Setup LC web ui dependencies.',
                                  os.path.join( root,
                                                'cloud',
                                                'limacharlie' ) ) ),
-    os.system( 'pip install markdown' ) )
+    os.system( 'pip3 install markdown' ) )
 
 printStep( 'Redirect port 80 and 443 to 9090 so we can run as non-root.',
            os.system( 'iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-port 9090' ),
