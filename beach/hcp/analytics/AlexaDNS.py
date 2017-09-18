@@ -15,7 +15,7 @@
 from beach.actor import Actor
 import urllib.request, urllib.error, urllib.parse
 from zipfile import ZipFile
-from io import StringIO
+from io import BytesIO
 import tld
 import tld.utils
 

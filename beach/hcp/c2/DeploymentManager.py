@@ -111,32 +111,12 @@ class DeploymentManager( Actor ):
 
         #r = M2Crypto.RSA.gen_key( 2048, 65537 )
         r = RSA.generate(2048)
-
-        tmpHandle, tmpPath = tempfile.mkstemp()
-        r.save_pub_key( tmpPath )
-        with open( tmpPath, 'rb' ) as f:
-            key[ 'pub' ] = f.read()
-        os.close( tmpHandle )
-        os.unlink( tmpPath )
-
-        tmpHandle, tmpPath = tempfile.mkstemp()
-        r.save_key( tmpPath, None )
-        with open( tmpPath, 'rb' ) as f:
-            key[ 'pri' ] = f.read()
-        os.system( 'openssl rsa -in %s -out %s.pub.der -outform DER -pubout' % ( tmpPath, tmpPath ) )
-        with open( '%s.pub.der' % tmpPath, 'rb' ) as f:
-            key[ 'pubDer' ] = f.read()
-        os.close( tmpHandle )
-        os.unlink( tmpPath )
-        os.unlink( '%s.pub.der' % tmpPath )
-
-        tmpHandle, tmpPath = tempfile.mkstemp()
-        r.save_key_der( tmpPath )
-        with open( tmpPath, 'rb' ) as f:
-            key[ 'priDer' ] = f.read()
-        os.close( tmpHandle )
-        os.unlink( tmpPath )
-
+        
+        key[ 'pri' ] = r.exportKey()
+        key[ 'priDer' ] = r.exportKey('DER')
+        key[ 'pub' ] = r.publickey().exportKey()
+        key[ 'pubDer' ] = r.publickey().exportKey('DER')
+        
         return key
 
     def generateCert( self ):
