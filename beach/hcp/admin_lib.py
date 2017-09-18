@@ -43,7 +43,7 @@ class BEAdmin( object ):
     
     def __init__( self, beach_config, token, timeout = 1000 * 10 ):
         self.token = token
-        self.empty_uuid = uuid.UUID( bytes = "\x00" * 16 )
+        self.empty_uuid = uuid.UUID( bytes = b"\x00" * 16 )
         self.beach = Beach( beach_config, realm = 'hcp' )
         self.vHandle = self.beach.getActorHandle( 'c2/admin/1.0',
                                                   ident = 'cli/955f6e63-9119-4ba6-a969-84b38bfbcc05',

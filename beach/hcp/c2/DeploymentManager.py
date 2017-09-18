@@ -140,7 +140,7 @@ class DeploymentManager( Actor ):
         return cert
 
     def packKey( self, key ):
-        return base64.b64encode( msgpack.packb( key ) )
+        return base64.b64encode( msgpack.packb( key ) ).decode('utf-8')
 
     def unpackKey( self, key ):
         return msgpack.unpackb( base64.b64decode( key ) )

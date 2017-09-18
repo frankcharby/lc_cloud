@@ -139,7 +139,7 @@ class IdentManager( Actor ):
         isNoConfirm = req.get( 'no_confirm', False )
         uid = uuid.uuid4()
         salt = hashlib.sha256( str( uuid.uuid4() ) ).hexdigest()
-        salted_password = hashlib.sha256( '%s%s' % ( password, salt ) ).hexdigest()
+        salted_password = hashlib.sha256( ('%s%s' % ( password, salt )).encode('utf-8') ).hexdigest()
         confirmationToken = str( uuid.uuid4() )
 
         otp = TwoFactorAuth( username = email )
