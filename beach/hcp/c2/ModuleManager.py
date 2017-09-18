@@ -40,7 +40,7 @@ class TaskingRule( object ):
 class ModuleManager( Actor ):
     def init( self, parameters, resources ):
         self.cacheSize = parameters.get( 'cache_size', 10 )
-    	self._db = CassDb( parameters[ 'db' ], 'hcp_analytics', consistencyOne = True )
+        self._db = CassDb( parameters[ 'db' ], 'hcp_analytics', consistencyOne = True )
         self.db = CassPool( self._db,
                             rate_limit_per_sec = parameters[ 'rate_limit_per_sec' ],
                             maxConcurrent = parameters[ 'max_concurrent' ],
@@ -54,7 +54,7 @@ class ModuleManager( Actor ):
         self.taskings = []
         self.moduleCache = RingCache( self.cacheSize )
 
-    	self.reloadTaskings()
+        self.reloadTaskings()
 
         self.handle( 'sync', self.sync )
         self.handle( 'reload', self.reloadTaskings )
@@ -80,24 +80,24 @@ class ModuleManager( Actor ):
         return ( mdat, msig )
 
     def sync( self, msg ):
-    	changes = { 'unload' : [], 'load' : [] }
-    	aid = msg.data[ 'aid' ]
+        changes = { 'unload' : [], 'load' : [] }
+        aid = msg.data[ 'aid' ]
 
-    	loaded = {}
+        loaded = {}
 
-    	for mod in msg.data[ 'mods' ]:
-    		loaded[ mod[ 'base.HASH' ].encode( 'hex' ) ] = mod[ 'hcp.MODULE_ID' ]
+        for mod in msg.data[ 'mods' ]:
+            loaded[ mod[ 'base.HASH' ].encode( 'hex' ) ] = mod[ 'hcp.MODULE_ID' ]
 
-    	shouldBeLoaded = {}
+        shouldBeLoaded = {}
 
-    	for rule in self.taskings:
-    		match = rule.isMatch( aid )
-    		if match is not False:
-    			shouldBeLoaded[ match[ 1 ] ] = match[ 0 ]
+        for rule in self.taskings:
+            match = rule.isMatch( aid )
+            if match is not False:
+                shouldBeLoaded[ match[ 1 ] ] = match[ 0 ]
 
-    	for hLoaded, iLoaded in loaded.items():
-    		if hLoaded not in shouldBeLoaded or iLoaded != shouldBeLoaded[ hLoaded ]:
-    			changes[ 'unload' ].append( iLoaded )
+        for hLoaded, iLoaded in loaded.items():
+            if hLoaded not in shouldBeLoaded or iLoaded != shouldBeLoaded[ hLoaded ]:
+                changes[ 'unload' ].append( iLoaded )
 
         for hToLoad, iToLoad in shouldBeLoaded.items():
             if hToLoad not in loaded or iToLoad != loaded[ hToLoad ]:
@@ -108,12 +108,12 @@ class ModuleManager( Actor ):
         return ( True, { 'changes' : changes } )
 
     def reloadTaskings( self, msg = None ):
-    	newTaskings = []
-    	for row in self.db.execute( self.loadTaskings.bind( tuple() ) ):
-    		newTaskings.append( TaskingRule( self, row[ 0 ], row[ 1 ], row[ 2 ] ) )
+        newTaskings = []
+        for row in self.db.execute( self.loadTaskings.bind( tuple() ) ):
+            newTaskings.append( TaskingRule( self, row[ 0 ], row[ 1 ], row[ 2 ] ) )
 
-    	self.taskings = newTaskings
+        self.taskings = newTaskings
 
-    	self.log( 'reloaded %d taskings' % ( len( newTaskings ), ) )
+        self.log( 'reloaded %d taskings' % ( len( newTaskings ), ) )
 
-    	return ( True, )
+        return ( True, )

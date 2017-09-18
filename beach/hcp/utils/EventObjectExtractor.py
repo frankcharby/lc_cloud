@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from beach.actor import Actor
-from sets import Set
+#from sets import Set
 
 _x_ = Actor.importLib( './hcp_helpers', '_x_' )
 _xm_ = Actor.importLib( './hcp_helpers', '_xm_' )
@@ -142,7 +142,7 @@ class EventObjectExtractor:
             if o is None or 0 == len( o ) or 10240 < len( o ):
                 raise InvalidObjectException( 'unexpected obj len: %s ( %s ), rest of objects: %s ::: %s' % ( o, oType, str( objects ), str( root ) ) )
                 return
-        objects[ 'obj' ].setdefault( oType, Set() ).add( o )
+        objects[ 'obj' ].setdefault( oType, set() ).add( o )
 
     @classmethod
     def _addRel( cls, root, objects, parent, parentType, child, childType ):
@@ -154,7 +154,7 @@ class EventObjectExtractor:
             if child is None or 0 == len( child ) or 10240 < len( parent ):
                 raise InvalidObjectException( 'unexpected rel child len: %s ( %s ), %s ( %s ) rest of objects: %s ::: %s' % ( child, childType, parent, parentType, str( objects ), str( root ) ) )
                 return
-        objects[ 'rel' ].setdefault( ( parentType, childType ), Set() ).add( ( parent, child ) )
+        objects[ 'rel' ].setdefault( ( parentType, childType ), set() ).add( ( parent, child ) )
 
     @classmethod
     def _extractProcessInfo( cls, fromAgent, objects, procRoot ):

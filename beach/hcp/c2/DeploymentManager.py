@@ -109,7 +109,8 @@ class DeploymentManager( Actor ):
             'priDer' : None,
         }
 
-        r = M2Crypto.RSA.gen_key( 2048, 65537 )
+        #r = M2Crypto.RSA.gen_key( 2048, 65537 )
+        r = RSA.generate(2048)
 
         tmpHandle, tmpPath = tempfile.mkstemp()
         r.save_pub_key( tmpPath )

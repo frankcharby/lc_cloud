@@ -665,6 +665,7 @@ Patrol( 'DataExporter',
             'isIsolated' : True,
             'strategy' : 'random' } )
 
+'''
 #######################################
 # VirusTotalActor
 # This actor retrieves VT reports while
@@ -696,6 +697,7 @@ Patrol( 'VirusTotalActor',
             'trustedIdents' : [ 'analysis/01e9a19d-78e1-4c37-9a6e-37cb592e3897',
                                 'hunter/8e0f55c0-6593-4747-9d02-a4937fa79517' ],
             'n_concurrent' : 50 } )
+'''
 
 #######################################
 # AlexaDNS
