@@ -58,8 +58,8 @@ print( 'Download prefixtree (expected to fail).' )
 os.system( 'pip3 download prefixtree' )
 
 printStep( 'Installing prefixtree.',
-    os.system( 'pip install --upgrade pip' ),
-    os.system( 'pip install distribute' ),
+    os.system( 'pip3 install --upgrade pip' ),
+    os.system( 'pip3 install distribute' ),
     os.system( 'tar xzf *prefixtree*.tar.gz' ),
     os.system( 'rm *prefixtree*.tar.gz' ),
     os.system( 'sed -i \'s/from distribute_setup import use_setuptools//g\' *prefixtree*/setup.py' ),
@@ -68,7 +68,7 @@ printStep( 'Installing prefixtree.',
 
 printStep( 'Installing Beach.',
     os.system( 'pip3 install distribute' ),
-    os.system( 'git clone https://github.com/frankcharby/py-beach.git; cd py-beach; python3 setup.py install' ) )
+    os.system( 'git clone https://github.com/frankcharby/py-beach.git; cd py-beach; python3 setup.py install; cd ..' ) )
     #os.system( 'pip3 install beach' ) )
 
 printStep( 'Installing JRE for Cassandra (the hcp-scale-db)',
